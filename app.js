@@ -2,6 +2,7 @@
   'use strict';
 
   const COURSE = window.COURSE;
+  const COURSE_CHECKS = window.COURSE_CHECKS || {};
   const STORAGE_KEY = 'htmllab-state-v1';
   const RESULT_KEY = 'htmllab-results-v1';
   const $ = (selector) => document.querySelector(selector);
@@ -188,9 +189,63 @@
   }
 
   function validateQuestion(question, answer = '') {
-    const normalized = normalize(answer);
-    const passed = question.required.every((pattern) => new RegExp(pattern, 'i').test(normalized));
-    return { passed, message: passed ? 'Nice. Struktur kodenya sudah sesuai.' : 'Belum pas. Cek kembali tag dan atribut yang diminta.' };
+    const checks = COURSE_CHECKS[question.id];
+    if (!checks || typeof DOMParser === 'undefined') {
+      const normalized = normalize(answer);
+      const passed = question.required.every((pattern) => new RegExp(pattern, 'i').test(normalized));
+      return { passed, message: passed ? 'Nice. Struktur kodenya sudah sesuai.' : 'Belum pas. Cek kembali tag dan atribut yang diminta.' };
+    }
+    const documentFragment = new DOMParser().parseFromString(answer, 'text/html');
+    const result = checks.map((check) => evaluateCheck(documentFragment, check)).find((item) => !item.passed);
+    return result ? { passed: false, message: result.message } : { passed: true, message: 'Nice. Struktur HTML-nya sudah sesuai.' };
+  }
+
+  function cleanText(value = '') {
+    return value.replace(/\s+/g, ' ').trim().toLowerCase();
+  }
+
+  function firstElement(documentFragment, tag) {
+    return documentFragment.querySelector(tag);
+  }
+
+  function evaluateCheck(documentFragment, check) {
+    const element = firstElement(documentFragment, check.tag);
+    const text = cleanText(check.text);
+    if (check.kind === 'doctype') return { passed: documentFragment.doctype?.name?.toLowerCase() === 'html', message: 'Tambahkan <!doctype html> di awal kode.' };
+    if (check.kind === 'attribute') return { passed: Boolean(element && element.getAttribute(check.attr)?.trim().toLowerCase() === check.value.toLowerCase()), message: `Pastikan tag ${check.tag} memiliki atribut ${check.attr}="${check.value}".` };
+    if (check.kind === 'elementText') return { passed: Boolean(element && cleanText(element.textContent) === text), message: `Gunakan tag ${check.tag} dengan isi “${check.text}”.` };
+    if (check.kind === 'containsText') return { passed: Boolean(element && cleanText(element.textContent).includes(text)), message: `Bungkus teks “${check.text}” dengan tag ${check.tag}.` };
+    if (check.kind === 'containsElementText') return { passed: Boolean(documentFragment.querySelector(check.parent)?.querySelector(check.child) && cleanText(documentFragment.querySelector(check.parent).querySelector(check.child).textContent) === text), message: `Pastikan ${check.child} “${check.text}” berada di dalam ${check.parent}.` };
+    if (check.kind === 'listText') {
+      const list = firstElement(documentFragment, check.tag);
+      const values = list ? Array.from(list.querySelectorAll(':scope > li')).map((item) => cleanText(item.textContent)) : [];
+      const expected = check.values.map(cleanText);
+      return { passed: Boolean(list && expected.every((value, index) => values[index] === value)), message: `Buat ${check.tag} dengan urutan: ${check.values.join(', ')}.` };
+    }
+    if (check.kind === 'labelInput') {
+      const label = documentFragment.querySelector(`label[for="${check.labelFor}"]`);
+      const input = documentFragment.querySelector(`input#${check.inputId}`);
+      return { passed: Boolean(label && input && cleanText(label.textContent) === text), message: 'Hubungkan label dan input memakai for="full-name" serta id="full-name".' };
+    }
+    if (check.kind === 'inputAttributes') {
+      const input = documentFragment.querySelector('input');
+      const passed = Boolean(input && input.getAttribute('type')?.toLowerCase() === check.type && input.getAttribute('name')?.toLowerCase() === check.name && input.hasAttribute('required'));
+      return { passed, message: 'Input harus memiliki type="email", name="email", dan required.' };
+    }
+    if (check.kind === 'button') {
+      const button = documentFragment.querySelector(`button[type="${check.type}"]`);
+      return { passed: Boolean(button && cleanText(button.textContent) === text), message: `Buat button type="${check.type}" dengan teks “${check.text}”.` };
+    }
+    if (check.kind === 'tableHeaders') {
+      const headers = Array.from(documentFragment.querySelectorAll('table thead th')).map((item) => cleanText(item.textContent));
+      const expected = check.values.map(cleanText);
+      return { passed: expected.every((value, index) => headers[index] === value), message: `Gunakan thead dengan header: ${check.values.join(' dan ')}.` };
+    }
+    if (check.kind === 'media') {
+      const media = firstElement(documentFragment, check.tag);
+      return { passed: Boolean(media && media.getAttribute(check.attr) === check.value && media.hasAttribute(check.requiredAttr)), message: `Gunakan ${check.tag} dengan src="${check.value}" dan atribut ${check.requiredAttr}.` };
+    }
+    return { passed: false, message: 'Cek kembali struktur kode HTML.' };
   }
 
   function renderExam() {
@@ -205,7 +260,7 @@
     $('#exam-view').innerHTML = `
       <section class="exam-topline"><div><p class="eyebrow">HTML CHALLENGE / LIVE SESSION</p><h2>Complete the layer<span class="hero-dot">.</span></h2></div><div class="exam-clock"><span class="clock-icon">◷</span><div><span>ELAPSED TIME</span><strong id="elapsed-time">${formatDuration((Date.now() - state.startedAt) / 1000)}</strong></div></div></section>
       <div class="exam-progress-row"><span>CHALLENGE <strong>${String(state.currentIndex + 1).padStart(2, '0')}</strong> / ${String(state.questionOrder.length).padStart(2, '0')}</span><span>${progress}% complete</span></div><div class="exam-progress"><span style="width:${progress}%"></span></div>
-      <section class="exam-grid"><div class="lesson-panel"><div class="panel-label"><span class="label-dot"></span> BEFORE YOU CODE <span class="panel-module">${COURSE.modules.find((module) => module.id === question.module)?.title || 'HTML'}</span></div><h3>${question.lessonTitle}</h3><p>${question.lessonBody}</p><div class="lesson-code large"><div class="code-window-head"><span class="window-dots"><i></i><i></i><i></i></span><span>concept.html</span><span class="code-lang">READ</span></div><pre><code>${escapeHtml(question.lessonCode)}</code></pre></div><div class="insight"><span>✦</span><span><strong>Quick insight</strong>${question.hint}</span></div></div><div class="question-panel"><div class="question-number">Q${String(state.currentIndex + 1).padStart(2, '0')} <span>of ${String(state.questionOrder.length).padStart(2, '0')}</span></div><h3>${question.title}</h3><p class="question-prompt">${question.prompt}</p><div class="editor-shell ${feedback ? (feedback.passed ? 'passed' : 'failed') : ''}"><div class="editor-head"><span><i></i> answer.html</span><span>HTML</span></div><textarea id="answer-editor" spellcheck="false" aria-label="Kode jawaban">${escapeHtml(state.answers[question.id] || question.starter)}</textarea><div class="editor-foot"><span>⌘ + Enter to check</span><button id="check-answer" class="check-button">Check code <span>↗</span></button></div></div>${feedback ? `<div class="feedback ${feedback.passed ? 'success' : 'error'}"><span>${feedback.passed ? '✓' : '!'}</span><div><strong>${feedback.passed ? 'Looks good!' : 'Keep iterating'}</strong><p>${feedback.message}</p></div></div>` : ''}<div class="question-actions"><button id="prev-question" class="secondary-button" ${state.currentIndex === 0 ? 'disabled' : ''}>← Previous</button><button id="next-question" class="primary-button">${state.currentIndex === state.questionOrder.length - 1 ? 'Finish test' : 'Next prompt'} <span>→</span></button></div></div></section>
+      <section class="exam-grid"><div class="lesson-panel"><div class="panel-label"><span class="label-dot"></span> BEFORE YOU CODE <span class="panel-module">${COURSE.modules.find((module) => module.id === question.module)?.title || 'HTML'}</span></div><h3>${question.lessonTitle}</h3><p>${question.lessonBody}</p><div class="lesson-code large"><div class="code-window-head"><span class="window-dots"><i></i><i></i><i></i></span><span>concept.html</span><button class="code-copy-button" data-action="copy-reference">Copy reference</button><span class="code-lang">READ</span></div><pre><code>${escapeHtml(question.lessonCode)}</code></pre></div><div class="insight"><span>✦</span><span><strong>Quick insight</strong>${question.hint}</span></div></div><div class="question-panel"><div class="question-number">Q${String(state.currentIndex + 1).padStart(2, '0')} <span>of ${String(state.questionOrder.length).padStart(2, '0')}</span></div><h3>${question.title}</h3><p class="question-prompt">${question.prompt}</p><div class="editor-shell ${feedback ? (feedback.passed ? 'passed' : 'failed') : ''}"><div class="editor-head"><span><i></i> answer.html</span><div class="editor-tools"><button type="button" data-editor-action="copy">Copy</button><button type="button" data-editor-action="paste">Paste</button><button type="button" data-editor-action="reset">Reset</button><span class="editor-type">HTML</span></div></div><textarea id="answer-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" aria-label="Kode jawaban">${escapeHtml(state.answers[question.id] || question.starter)}</textarea><div class="editor-foot"><span>⌘ / Ctrl + Enter to check · Ctrl / Cmd + V supported</span><button id="check-answer" class="check-button">Check code <span>↗</span></button></div></div><div class="preview-card"><div class="preview-head"><span><span class="label-dot"></span> LIVE PREVIEW</span><span>lihat hasil HTML kamu</span></div><iframe id="live-preview" title="Preview hasil kode HTML" sandbox=""></iframe></div>${feedback ? `<div class="feedback ${feedback.passed ? 'success' : 'error'}"><span>${feedback.passed ? '✓' : '!'}</span><div><strong>${feedback.passed ? 'Looks good!' : 'Keep iterating'}</strong><p>${feedback.message}</p></div></div>` : ''}<div class="question-actions"><button id="prev-question" class="secondary-button" ${state.currentIndex === 0 ? 'disabled' : ''}>← Previous</button><button id="next-question" class="primary-button">${state.currentIndex === state.questionOrder.length - 1 ? 'Finish test' : 'Next prompt'} <span>→</span></button></div></div></section>
     `;
     bindExamEvents(question);
     startTimer();
@@ -213,12 +268,25 @@
 
   function bindExamEvents(question) {
     const editor = $('#answer-editor');
+    const updatePreview = () => { const preview = $('#live-preview'); if (preview) preview.srcdoc = editor.value; };
     editor.addEventListener('input', () => { state.answers[question.id] = editor.value; persist(); });
+    editor.addEventListener('input', updatePreview);
     editor.addEventListener('keydown', (event) => {
       if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') { event.preventDefault(); checkAnswer(question); }
       if (event.key === 'Tab') { event.preventDefault(); const start = editor.selectionStart; editor.value = `${editor.value.slice(0, start)}  ${editor.value.slice(editor.selectionEnd)}`; editor.selectionStart = editor.selectionEnd = start + 2; state.answers[question.id] = editor.value; }
     });
     $('#check-answer').addEventListener('click', () => checkAnswer(question));
+    $('[data-action="copy-reference"]').addEventListener('click', () => copyText(question.lessonCode, 'Referensi berhasil disalin.'));
+    $$('[data-editor-action]').forEach((button) => button.addEventListener('click', async () => {
+      const action = button.dataset.editorAction;
+      if (action === 'copy') copyText(editor.value, 'Kode jawaban berhasil disalin.');
+      if (action === 'reset') { editor.value = question.starter; state.answers[question.id] = editor.value; state.feedback[question.id] = null; persist(); updatePreview(); renderExam(); showToast('Editor dikembalikan ke starter code.'); }
+      if (action === 'paste') {
+        try { editor.value = await navigator.clipboard.readText(); editor.dispatchEvent(new Event('input')); editor.focus(); showToast('Kode berhasil ditempel dari clipboard.', 'success'); }
+        catch (error) { showToast('Clipboard dibatasi browser. Gunakan Ctrl/Cmd + V di editor.', 'error'); editor.focus(); }
+      }
+    }));
+    updatePreview();
     $('#prev-question').addEventListener('click', () => { if (state.currentIndex > 0) { state.currentIndex -= 1; persist(); renderExam(); } });
     $('#next-question').addEventListener('click', () => {
       const result = validateQuestion(question, state.answers[question.id] || editor.value);
@@ -238,6 +306,14 @@
     persist();
     renderExam();
     showToast(state.feedback[question.id].passed ? 'Jawaban benar. Keep going!' : 'Belum pas, coba lagi.', state.feedback[question.id].passed ? 'success' : 'error');
+  }
+
+  function copyText(text, message) {
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(() => showToast(message, 'success')).catch(() => showToast('Copy dibatasi browser. Gunakan Ctrl/Cmd + C.', 'error'));
+      return;
+    }
+    showToast('Copy dibatasi browser. Gunakan Ctrl/Cmd + C.', 'error');
   }
 
   function startTimer() {

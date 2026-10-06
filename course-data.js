@@ -37,3 +37,28 @@ window.COURSE = {
     { id: 'html-20', module: 'forms', title: 'Embed a video', prompt: 'Sematkan video “intro.mp4” dengan kontrol pemutar terlihat.', lessonTitle: 'Media element', lessonBody: 'Elemen video menampilkan media langsung di halaman. Atribut controls menampilkan kontrol play, pause, dan volume bawaan browser.', lessonCode: '<video src="intro.mp4" controls>\n  Browser kamu belum mendukung video.\n</video>', starter: '<!-- Video pengantar kelas -->', required: ['<video[^>]*\\bsrc\\s*=\\s*["\']intro\\.mp4["\'][^>]*\\bcontrols'], hint: 'Gunakan tag video, src intro.mp4, dan controls.' }
   ]
 };
+
+// Structural checks make the challenge flexible: whitespace, quote style,
+// and attribute order can vary as long as the HTML meaning is correct.
+window.COURSE_CHECKS = {
+  'html-01': [{ kind: 'doctype' }],
+  'html-02': [{ kind: 'attribute', tag: 'html', attr: 'lang', value: 'id' }],
+  'html-03': [{ kind: 'attribute', tag: 'meta', attr: 'charset', value: 'utf-8' }],
+  'html-04': [{ kind: 'elementText', tag: 'title', text: 'HTML Lab' }],
+  'html-05': [{ kind: 'elementText', tag: 'h1', text: 'Belajar HTML' }],
+  'html-06': [{ kind: 'elementText', tag: 'p', text: 'HTML itu menyenangkan.' }],
+  'html-07': [{ kind: 'attribute', tag: 'a', attr: 'href', value: 'https://developer.mozilla.org' }, { kind: 'elementText', tag: 'a', text: 'Kunjungi MDN' }],
+  'html-08': [{ kind: 'attribute', tag: 'img', attr: 'src', value: 'avatar.png' }, { kind: 'attribute', tag: 'img', attr: 'alt', value: 'Foto profil mahasiswa' }],
+  'html-09': [{ kind: 'listText', tag: 'ul', values: ['HTML', 'CSS'] }],
+  'html-10': [{ kind: 'listText', tag: 'ol', values: ['Riset', 'Kode', 'Rilis'] }],
+  'html-11': [{ kind: 'containsText', tag: 'header', text: 'HTML Lab' }],
+  'html-12': [{ kind: 'containsElementText', parent: 'nav', child: 'a', text: 'Beranda' }],
+  'html-13': [{ kind: 'containsText', tag: 'main', text: 'Konten utama' }],
+  'html-14': [{ kind: 'attribute', tag: 'section', attr: 'id', value: 'tentang' }, { kind: 'elementText', tag: 'h2', text: 'Tentang kelas' }],
+  'html-15': [{ kind: 'containsElementText', parent: 'article', child: 'h2', text: 'Catatan belajar' }],
+  'html-16': [{ kind: 'labelInput', labelFor: 'full-name', inputId: 'full-name', text: 'Nama lengkap' }],
+  'html-17': [{ kind: 'inputAttributes', type: 'email', name: 'email', required: true }],
+  'html-18': [{ kind: 'button', type: 'submit', text: 'Kirim jawaban' }],
+  'html-19': [{ kind: 'tableHeaders', values: ['Nama', 'Skor'] }],
+  'html-20': [{ kind: 'media', tag: 'video', attr: 'src', value: 'intro.mp4', requiredAttr: 'controls' }]
+};
