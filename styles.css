@@ -152,3 +152,84 @@ button:disabled { cursor: not-allowed; opacity: .35; }
   .app-shell { display: block; }.sidebar { position: fixed; z-index: 5; bottom: 0; top: auto; width: 100%; height: 64px; padding: 7px 13px; border-top: 1px solid var(--line); border-right: 0; flex-direction: row; align-items: center; background: rgba(7,10,29,.93); }.sidebar-brand, .sidebar-label, .sidebar-bottom { display: none; }.side-nav { display: flex; width: 100%; justify-content: space-around; }.nav-item { flex: 1; justify-content: center; min-height: 48px; padding: 0 3px; font-size: 9px; }.nav-item .nav-icon { font-size: 16px; }.nav-badge { display: none; }.topbar { min-height: 68px; padding-inline: 20px; }.mobile-brand { display: flex; font-size: 12px; }.topbar-context { display: none; }.profile-chip .profile-chevron { display: none; }.page-view { padding: 33px 20px 100px; }.hero-section, .exam-grid, .lesson-layout, .bottom-rail { grid-template-columns: 1fr; }.hero-section { min-height: 0; }.hero-code { margin-top: 15px; }.stat-grid { grid-template-columns: 1fr; margin-top: 38px; }.stat-card { min-height: 88px; }.section-heading { margin-top: 45px; }.module-grid { grid-template-columns: 1fr 1fr; }.module-card { padding: 14px; }.module-card h4 { margin-top: 20px; font-size: 12px; }.module-card p { min-height: 55px; font-size: 9px; }.challenge-card { min-height: 165px; }.page-intro { display: block; }.lesson-progress { margin-top: 25px; }.lesson-layout { margin-top: 25px; }.lesson-aside { order: -1; }.aside-sticky { position: static; }.exam-topline { align-items: start; }.exam-clock { margin-top: 5px; }.exam-topline h2 { font-size: 38px; }.exam-grid { margin-top: 18px; }.result-score-card { flex-direction: column; gap: 24px; padding: 28px 20px; text-align: center; }.result-details h3 { font-size: 18px; }.result-metrics { justify-content: center; }.result-page h2 { font-size: 42px; }.result-actions { flex-direction: column; width: 100%; max-width: 260px; }.question-actions .secondary-button, .question-actions .primary-button { padding-inline: 12px; }
 }
 @media (max-width: 440px) { .module-grid { grid-template-columns: 1fr; }.module-card p { min-height: 0; }.hero-copy h2 { font-size: 42px; }.login-panel h1 { font-size: 42px; }.exam-clock { padding: 7px 9px; }.exam-clock span:not(.clock-icon) { font-size: 7px; }.lesson-panel, .question-panel { padding: 16px; }.question-panel h3 { font-size: 23px; } }
+
+/* Light mode / readability pass */
+:root {
+  --bg: #f5f7ff;
+  --bg-soft: #ffffff;
+  --card: rgba(255, 255, 255, .82);
+  --card-solid: #ffffff;
+  --line: rgba(43, 57, 112, .14);
+  --text: #19213f;
+  --muted: #5e698a;
+  --cyan: #087f98;
+  --violet: #6848cc;
+  --lime: #668d18;
+  --pink: #c84eaa;
+  --danger: #c43d5d;
+}
+
+body { background: var(--bg); color: var(--text); font-size: 16px; }
+.ambient { opacity: .09; }
+.grid-overlay { opacity: .34; background-image: linear-gradient(rgba(72, 91, 166, .08) 1px, transparent 1px), linear-gradient(90deg, rgba(72, 91, 166, .08) 1px, transparent 1px); }
+.topbar, .sidebar { background: rgba(255, 255, 255, .78); }
+.sidebar { box-shadow: 10px 0 35px rgba(44, 62, 120, .04); }
+.topbar { box-shadow: 0 8px 25px rgba(44, 62, 120, .04); }
+.sidebar-label, .topbar-context, .sidebar-version { color: #7883a3; }
+.nav-item { color: #5d6889; }
+.nav-item:hover { color: var(--text); background: rgba(8, 127, 152, .06); }
+.nav-item.active { border-color: rgba(8, 127, 152, .2); background: rgba(8, 127, 152, .08); color: var(--cyan); }
+.profile-chip strong { color: var(--text); }
+.profile-chip #profile-npm { color: #7480a2; }
+.login-panel h1, .hero-copy h2, .page-intro h2, .exam-topline h2, .result-page h2, .section-heading h3, .lesson-banner h3, .concept-tag, .question-panel h3, .empty-state h2 { color: var(--text); }
+.login-copy, .hero-copy > p:not(.eyebrow), .page-intro > div > p:not(.eyebrow) { color: #5f6a8c; font-size: 15px; }
+.login-form label { color: #3e496c; font-size: 13px; }
+.login-form input { border-color: rgba(43, 57, 112, .18); background: rgba(255,255,255,.8); color: var(--text); font-size: 13px; }
+.login-form input::placeholder { color: #8b94af; }
+.login-footnote { color: #7180a4; font-size: 10px; }
+.stat-card, .module-card, .quote-card, .challenge-card, .lesson-panel, .question-panel, .concept-card { border-color: var(--line); background: var(--card); box-shadow: 0 10px 28px rgba(44, 62, 120, .045); }
+.stat-card:hover, .module-card:hover, .module-card.is-complete { background: rgba(8, 127, 152, .07); }
+.stat-label, .stat-sub, .module-card p, .quote-author, .challenge-card p:not(.eyebrow), .concept-body > p, .lesson-banner p:not(.eyebrow), .aside-sticky p:not(.eyebrow), .question-prompt, .result-lead { color: #5e698a; }
+.stat-label, .stat-sub { font-size: 10px; }
+.stat-card strong { font-size: 30px; }
+.section-heading h3 { font-size: 27px; }
+.module-card h4 { font-size: 15px; }
+.module-card p { min-height: 48px; font-size: 12px; line-height: 1.6; }
+.module-card-foot { font-size: 9px; }
+.text-button { font-size: 12px; }
+.module-tab { color: #657090; font-size: 12px; }
+.module-tab.active, .module-tab:hover { color: var(--text); }
+.lesson-progress span, .exam-progress-row, .result-note { color: #677391; font-size: 10px; }
+.lesson-progress strong { font-size: 27px; }
+.panel-label, .question-number, .editor-foot, .insight, .checkpoint-count span { font-size: 10px; }
+.lesson-banner p:not(.eyebrow), .aside-sticky p:not(.eyebrow) { font-size: 12px; }
+.concept-tag { font-size: 16px; }
+.concept-body > p, .question-prompt { font-size: 13px; }
+.code-window-head, .editor-head { font-size: 10px; }
+.hero-code pre, .lesson-code pre { font-size: 12px; }
+.question-panel h3 { font-size: 30px; }
+.question-prompt { font-size: 14px; }
+.editor-shell textarea { font-size: 12px; }
+.feedback { font-size: 11px; }
+.exam-clock span:not(.clock-icon) { font-size: 9px; }
+.exam-clock strong { font-size: 15px; }
+.result-details h3 { font-size: 23px; }
+.result-metrics small { font-size: 9px; }
+.toast { font-size: 12px; }
+
+/* Code surfaces intentionally stay dark for high syntax contrast. */
+.hero-code, .lesson-code, .editor-shell { border-color: rgba(68, 87, 156, .25); }
+.streak-card { border-color: rgba(102, 141, 24, .22); background: rgba(102, 141, 24, .07); }
+.streak-card strong { color: #506a18; }
+.streak-card span { color: #728647; }
+.logout-button { color: #647091; }
+.lesson-banner { border-color: rgba(104, 72, 204, .2); background: linear-gradient(110deg, rgba(104,72,204,.08), rgba(8,127,152,.04)); }
+.aside-sticky { border-color: rgba(8, 127, 152, .2); background: rgba(8, 127, 152, .05); }
+.result-score-card { border-color: rgba(8, 127, 152, .2); background: linear-gradient(120deg, rgba(8,127,152,.08), rgba(104,72,204,.08)); }
+.empty-state p { color: #5e698a; }
+
+@media (max-width: 760px) {
+  .sidebar { background: rgba(255,255,255,.94); }
+  .module-card p { min-height: 58px; font-size: 11px; }
+  .question-panel h3 { font-size: 26px; }
+}
