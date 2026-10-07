@@ -307,7 +307,7 @@ button:disabled {
 
 .login-panel h1 {
   margin: 16px 0 20px;
-  font-size: clamp(42px, 5vw, 68px);
+  font-size: clamp(42px, 5vw, 40px);
   line-height: .98;
   letter-spacing: -.06em;
 }
@@ -2917,8 +2917,8 @@ body {
 .campus-logo {
   display: block;
   flex: 0 0 30px;
-  width: 30px;
-  height: 30px;
+  /* width: 30px; */
+  height: 60px;
   object-fit: contain;
   border-radius: 50%;
 }
