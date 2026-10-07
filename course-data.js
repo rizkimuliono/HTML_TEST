@@ -62,3 +62,17 @@ window.COURSE_CHECKS = {
   'html-19': [{ kind: 'tableHeaders', values: ['Nama', 'Skor'] }],
   'html-20': [{ kind: 'media', tag: 'video', attr: 'src', value: 'intro.mp4', requiredAttr: 'controls' }]
 };
+
+// Sebagian challenge memakai pendekatan visual-first: mahasiswa melihat hasil
+// browser dan clue, lalu membangun potongan HTML-nya sendiri.
+window.VISUAL_CHALLENGES = {
+  'html-05': { label: 'TARGET BROWSER OUTPUT', html: '<h1>Belajar HTML</h1>', clue: 'Gunakan heading utama. Elemen paling penting di halaman biasanya memakai h1.' },
+  'html-06': { label: 'TARGET BROWSER OUTPUT', html: '<p>HTML itu menyenangkan.</p>', clue: 'Kalimat ini adalah satu paragraf. Bungkus teks dengan tag yang tepat.' },
+  'html-07': { label: 'TARGET BROWSER OUTPUT', html: '<a href="https://developer.mozilla.org">Kunjungi MDN</a>', clue: 'Tampilan ini adalah sebuah hyperlink. Ingat, link membutuhkan alamat tujuan.' },
+  'html-09': { label: 'TARGET BROWSER OUTPUT', html: '<ul><li>HTML</li><li>CSS</li></ul>', clue: 'Daftar ini tidak memakai nomor. Gunakan list tanpa urutan dan item-item di dalamnya.' },
+  'html-10': { label: 'TARGET BROWSER OUTPUT', html: '<ol><li>Riset</li><li>Kode</li><li>Rilis</li></ol>', clue: 'Browser menghasilkan nomor otomatis. Pikirkan tag untuk daftar yang memiliki urutan.' },
+  'html-12': { label: 'TARGET BROWSER OUTPUT', html: '<nav><a href="/">Beranda</a></nav>', clue: 'Link Beranda ini adalah bagian dari navigasi halaman.' },
+  'html-14': { label: 'TARGET BROWSER OUTPUT', html: '<section id="tentang"><h2>Tentang kelas</h2></section>', clue: 'Buat satu section bertema tentang kelas dan beri identitas unik untuknya.' },
+  'html-17': { label: 'TARGET BROWSER OUTPUT', html: '<label for="email">Email</label><br><input id="email" type="email" name="email" required>', clue: 'Field ini menerima alamat email dan wajib diisi sebelum form dikirim.' },
+  'html-18': { label: 'TARGET BROWSER OUTPUT', html: '<button type="submit">Kirim jawaban</button>', clue: 'Kontrol ini adalah tombol untuk mengirim form.' }
+};

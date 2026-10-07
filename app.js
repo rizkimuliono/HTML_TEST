@@ -3,6 +3,7 @@
 
   const COURSE = window.COURSE;
   const COURSE_CHECKS = window.COURSE_CHECKS || {};
+  const VISUAL_CHALLENGES = window.VISUAL_CHALLENGES || {};
   const STORAGE_KEY = 'htmllab-state-v1';
   const RESULT_KEY = 'htmllab-results-v1';
   const $ = (selector) => document.querySelector(selector);
@@ -256,11 +257,14 @@
     }
     const question = currentQuestion();
     const feedback = state.feedback[question.id];
+    const visualChallenge = VISUAL_CHALLENGES[question.id];
     const progress = Math.round(((state.currentIndex + 1) / state.questionOrder.length) * 100);
+    const lessonVisual = visualChallenge ? `<div class="visual-target"><div class="visual-target-head"><span class="window-dots"><i></i><i></i><i></i></span><span>${visualChallenge.label}</span><span class="code-lang">BROWSER</span></div><div class="target-browser">${visualChallenge.html}</div><div class="visual-clue"><span>✦</span><div><strong>CLUE</strong><p>${visualChallenge.clue}</p></div></div></div>` : `<div class="lesson-code large"><div class="code-window-head"><span class="window-dots"><i></i><i></i><i></i></span><span>concept.html</span><span class="code-lang">READ ONLY</span></div><pre><code>${escapeHtml(question.lessonCode)}</code></pre></div><div class="insight"><span>✦</span><span><strong>Quick insight</strong>${question.hint}</span></div>`;
+    const visualPrompt = visualChallenge ? 'Bangun potongan HTML yang menghasilkan tampilan preview target di sebelah kiri.' : question.prompt;
     $('#exam-view').innerHTML = `
       <section class="exam-topline"><div><p class="eyebrow">HTML CHALLENGE / LIVE SESSION</p><h2>Complete the layer<span class="hero-dot">.</span></h2></div><div class="exam-clock"><span class="clock-icon">◷</span><div><span>ELAPSED TIME</span><strong id="elapsed-time">${formatDuration((Date.now() - state.startedAt) / 1000)}</strong></div></div></section>
       <div class="exam-progress-row"><span>CHALLENGE <strong>${String(state.currentIndex + 1).padStart(2, '0')}</strong> / ${String(state.questionOrder.length).padStart(2, '0')}</span><span>${progress}% complete</span></div><div class="exam-progress"><span style="width:${progress}%"></span></div>
-      <section class="exam-grid"><div class="lesson-panel"><div class="panel-label"><span class="label-dot"></span> BEFORE YOU CODE <span class="panel-module">${COURSE.modules.find((module) => module.id === question.module)?.title || 'HTML'}</span></div><h3>${question.lessonTitle}</h3><p>${question.lessonBody}</p><div class="lesson-code large"><div class="code-window-head"><span class="window-dots"><i></i><i></i><i></i></span><span>concept.html</span><button class="code-copy-button" data-action="copy-reference">Copy reference</button><span class="code-lang">READ</span></div><pre><code>${escapeHtml(question.lessonCode)}</code></pre></div><div class="insight"><span>✦</span><span><strong>Quick insight</strong>${question.hint}</span></div></div><div class="question-panel"><div class="question-number">Q${String(state.currentIndex + 1).padStart(2, '0')} <span>of ${String(state.questionOrder.length).padStart(2, '0')}</span></div><h3>${question.title}</h3><p class="question-prompt">${question.prompt}</p><div class="editor-shell ${feedback ? (feedback.passed ? 'passed' : 'failed') : ''}"><div class="editor-head"><span><i></i> answer.html</span><div class="editor-tools"><button type="button" data-editor-action="copy">Copy</button><button type="button" data-editor-action="paste">Paste</button><button type="button" data-editor-action="reset">Reset</button><span class="editor-type">HTML</span></div></div><textarea id="answer-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" aria-label="Kode jawaban">${escapeHtml(state.answers[question.id] || question.starter)}</textarea><div class="editor-foot"><span>⌘ / Ctrl + Enter to check · Ctrl / Cmd + V supported</span><button id="check-answer" class="check-button">Check code <span>↗</span></button></div></div><div class="preview-card"><div class="preview-head"><span><span class="label-dot"></span> LIVE PREVIEW</span><span>lihat hasil HTML kamu</span></div><iframe id="live-preview" title="Preview hasil kode HTML" sandbox=""></iframe></div>${feedback ? `<div class="feedback ${feedback.passed ? 'success' : 'error'}"><span>${feedback.passed ? '✓' : '!'}</span><div><strong>${feedback.passed ? 'Looks good!' : 'Keep iterating'}</strong><p>${feedback.message}</p></div></div>` : ''}<div class="question-actions"><button id="prev-question" class="secondary-button" ${state.currentIndex === 0 ? 'disabled' : ''}>← Previous</button><button id="next-question" class="primary-button">${state.currentIndex === state.questionOrder.length - 1 ? 'Finish test' : 'Next prompt'} <span>→</span></button></div></div></section>
+      <section class="exam-grid"><div class="lesson-panel"><div class="panel-label"><span class="label-dot"></span> ${visualChallenge ? 'SEE & BUILD' : 'BEFORE YOU CODE'} <span class="panel-module">${COURSE.modules.find((module) => module.id === question.module)?.title || 'HTML'}</span></div><h3>${question.lessonTitle}</h3><p>${visualChallenge ? 'Amati output browser, baca clue, lalu tulis struktur HTML yang dapat menghasilkan tampilan tersebut.' : question.lessonBody}</p>${lessonVisual}</div><div class="question-panel"><div class="question-number">Q${String(state.currentIndex + 1).padStart(2, '0')} <span>of ${String(state.questionOrder.length).padStart(2, '0')}</span></div><h3>${question.title}</h3><p class="question-prompt">${visualPrompt}</p><div class="editor-shell ${feedback ? (feedback.passed ? 'passed' : 'failed') : ''}"><div class="editor-head"><span><i></i> answer.html</span><div class="editor-tools"><button type="button" data-editor-action="reset">Reset</button><span class="editor-type">TYPE MANUALLY</span></div></div><textarea id="answer-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" aria-label="Kode jawaban">${escapeHtml(state.answers[question.id] || question.starter)}</textarea><div class="editor-foot"><span>Type manually · ⌘ / Ctrl + Enter to check</span><button id="check-answer" class="check-button">Check code <span>↗</span></button></div></div><div class="clipboard-lock"><span>⌁</span> Copy-paste, cut, dan drag-drop kode dinonaktifkan untuk challenge ini.</div><div class="preview-card"><div class="preview-head"><span><span class="label-dot"></span> LIVE PREVIEW</span><span>lihat hasil HTML kamu</span></div><iframe id="live-preview" title="Preview hasil kode HTML" sandbox=""></iframe></div>${feedback ? `<div class="feedback ${feedback.passed ? 'success' : 'error'}"><span>${feedback.passed ? '✓' : '!'}</span><div><strong>${feedback.passed ? 'Looks good!' : 'Keep iterating'}</strong><p>${feedback.message}</p></div></div>` : ''}<div class="question-actions"><button id="prev-question" class="secondary-button" ${state.currentIndex === 0 ? 'disabled' : ''}>← Previous</button><button id="next-question" class="primary-button">${state.currentIndex === state.questionOrder.length - 1 ? 'Finish test' : 'Next prompt'} <span>→</span></button></div></div></section>
     `;
     bindExamEvents(question);
     startTimer();
@@ -272,20 +276,20 @@
     editor.addEventListener('input', () => { state.answers[question.id] = editor.value; persist(); });
     editor.addEventListener('input', updatePreview);
     editor.addEventListener('keydown', (event) => {
+      if ((event.ctrlKey || event.metaKey) && ['c', 'v', 'x'].includes(event.key.toLowerCase())) {
+        event.preventDefault();
+        showToast('Copy-paste diblokir. Ketik kode secara manual.', 'error');
+        return;
+      }
       if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') { event.preventDefault(); checkAnswer(question); }
       if (event.key === 'Tab') { event.preventDefault(); const start = editor.selectionStart; editor.value = `${editor.value.slice(0, start)}  ${editor.value.slice(editor.selectionEnd)}`; editor.selectionStart = editor.selectionEnd = start + 2; state.answers[question.id] = editor.value; }
     });
     $('#check-answer').addEventListener('click', () => checkAnswer(question));
-    $('[data-action="copy-reference"]').addEventListener('click', () => copyText(question.lessonCode, 'Referensi berhasil disalin.'));
-    $$('[data-editor-action]').forEach((button) => button.addEventListener('click', async () => {
+    $$('[data-editor-action]').forEach((button) => button.addEventListener('click', () => {
       const action = button.dataset.editorAction;
-      if (action === 'copy') copyText(editor.value, 'Kode jawaban berhasil disalin.');
       if (action === 'reset') { editor.value = question.starter; state.answers[question.id] = editor.value; state.feedback[question.id] = null; persist(); updatePreview(); renderExam(); showToast('Editor dikembalikan ke starter code.'); }
-      if (action === 'paste') {
-        try { editor.value = await navigator.clipboard.readText(); editor.dispatchEvent(new Event('input')); editor.focus(); showToast('Kode berhasil ditempel dari clipboard.', 'success'); }
-        catch (error) { showToast('Clipboard dibatasi browser. Gunakan Ctrl/Cmd + V di editor.', 'error'); editor.focus(); }
-      }
     }));
+    bindClipboardLock();
     updatePreview();
     $('#prev-question').addEventListener('click', () => { if (state.currentIndex > 0) { state.currentIndex -= 1; persist(); renderExam(); } });
     $('#next-question').addEventListener('click', () => {
@@ -308,12 +312,23 @@
     showToast(state.feedback[question.id].passed ? 'Jawaban benar. Keep going!' : 'Belum pas, coba lagi.', state.feedback[question.id].passed ? 'success' : 'error');
   }
 
-  function copyText(text, message) {
-    if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(text).then(() => showToast(message, 'success')).catch(() => showToast('Copy dibatasi browser. Gunakan Ctrl/Cmd + C.', 'error'));
-      return;
-    }
-    showToast('Copy dibatasi browser. Gunakan Ctrl/Cmd + C.', 'error');
+  function bindClipboardLock() {
+    const exam = $('#exam-view');
+    if (!exam || exam.dataset.clipboardLocked === 'true') return;
+    exam.dataset.clipboardLocked = 'true';
+    ['copy', 'cut', 'paste'].forEach((eventName) => exam.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      if (eventName === 'paste') showToast('Paste diblokir. Ketik kode secara manual.', 'error');
+    }));
+    exam.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
+      showToast('Context menu dinonaktifkan selama challenge.', 'error');
+    });
+    exam.addEventListener('dragstart', (event) => event.preventDefault());
+    exam.addEventListener('drop', (event) => {
+      event.preventDefault();
+      showToast('Drag-drop kode diblokir. Ketik kode secara manual.', 'error');
+    });
   }
 
   function startTimer() {

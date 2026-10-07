@@ -1,6 +1,6 @@
 # HTML LAB — Interactive LMS
 
-LMS mini untuk materi dasar HTML: login mahasiswa, materi per modul, 20 coding challenge yang diacak, editor kode dengan structural validation, live preview, copy/paste/reset, timer elapsed (tanpa countdown), penilaian, dan penyimpanan hasil.
+LMS mini untuk materi dasar HTML: login mahasiswa, materi per modul, 20 coding challenge yang diacak, editor kode dengan structural validation, live preview, reset, pembatasan copy-paste, timer elapsed (tanpa countdown), penilaian, dan penyimpanan hasil.
 
 ## Jalankan lokal
 
