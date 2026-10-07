@@ -32,6 +32,10 @@
 .challenge-instructions strong { color: var(--violet); font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
 .challenge-instructions ol { display: grid; gap: 5px; margin: 8px 0 0; padding-left: 21px; color: #687493; font-size: 12px; line-height: 1.45; }
 .challenge-instructions li::marker { color: var(--cyan); font-family: var(--mono); }
+.challenge-requirements { margin-top: 12px; padding: 11px 12px; border: 1px solid rgba(19, 150, 176, .18); border-radius: 9px; background: rgba(19, 150, 176, .045); }
+.challenge-requirements strong { color: #087f99; font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+.challenge-requirements ul { display: grid; gap: 5px; margin: 8px 0 0; padding-left: 18px; color: #536486; font-size: 12px; line-height: 1.45; }
+.challenge-requirements li::marker { color: var(--cyan); }
 
 * {
   box-sizing: border-box;
