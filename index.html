@@ -1,84 +1,111 @@
 <!doctype html>
 <html lang="id">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#080b1f" />
-    <meta name="description" content="HTML Foundations — ruang belajar dan ujian interaktif." />
-    <title>HTML // Foundations</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body>
-    <div class="ambient ambient-one"></div>
-    <div class="ambient ambient-two"></div>
-    <div class="grid-overlay"></div>
 
-    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#080b1f" />
+  <meta name="description" content="HTML Foundations — ruang belajar dan ujian interaktif." />
+  <title>HTML // Foundations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
 
-    <section id="login-screen" class="login-screen">
-      <div class="login-visual">
-        <div class="visual-orbit orbit-one"></div>
-        <div class="visual-orbit orbit-two"></div>
-        <div class="visual-core"><span>&lt;/&gt;</span></div>
-        <div class="floating-tag tag-one">&lt;learn /&gt;</div>
-        <div class="floating-tag tag-two">30 TOPICS</div>
-        <div class="floating-tag tag-three">BUILD • TEST • GROW</div>
-      </div>
-      <div class="login-panel">
-        <div class="brand-mark"><img class="campus-logo" src="assets/Logo_UMA_2026.png" alt="Logo Universitas Medan Area" height="80px;"/><span class="brand-symbol">&lt;/&gt;</span><span>HTML<span class="brand-accent">LAB</span></span></div>
-        <p class="eyebrow">LEARNING MANAGEMENT SYSTEM · 01</p>
-        <h1>Build your<br /><em>first web layer.</em></h1>
-        <p class="login-copy">Masuk ke ruang belajar interaktif dan kuasai HTML dari tag pertama sampai halaman web lengkap melalui 30 materi dan challenge praktikal.</p>
-        <form id="login-form" class="login-form">
-          <label for="npm">Nomor Pokok Mahasiswa <span>*</span></label>
-          <input id="npm" name="npm" type="text" inputmode="numeric" autocomplete="username" placeholder="Contoh: 231011234" required />
-          <label for="student-name">Nama lengkap <span>*</span></label>
-          <input id="student-name" name="student-name" type="text" autocomplete="name" placeholder="Tulis nama kamu" required />
-          <button class="primary-button full-button" type="submit">Masuk ke LAB <span>↗</span></button>
-        </form>
-        <div class="login-footnote"><span class="status-dot"></span> Data progress tersimpan aman di perangkatmu</div>
-        <div class="lecturer-credit login-credit"><span class="credit-label">MATA KULIAH: HTML</span><strong>Rizki Muliono, S.Kom., M.Kom.</strong><span>Dosen pengampu</span></div>
-        <div class="login-features"><span><strong>30</strong> materi</span><span><strong>30</strong> challenge</span><span><strong>∞</strong> explore</span></div>
-      </div>
-    </section>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+  <div class="grid-overlay"></div>
 
-    <div id="app-shell" class="app-shell hidden">
-      <aside class="sidebar">
-        <div class="sidebar-brand"><img class="campus-logo" src="assets/Logo_UMA_2026.png" alt="Logo Universitas Medan Area"  height="60px;"/><span class="brand-symbol">&lt;/&gt;</span><span>HTML<span class="brand-accent">LAB</span></span></div>
-        <div class="sidebar-label">YOUR SPACE</div>
-        <nav class="side-nav" aria-label="Navigasi utama">
-          <button class="nav-item active" data-view="dashboard"><span class="nav-icon">⌂</span><span>Overview</span></button>
-          <button class="nav-item" data-view="lesson"><span class="nav-icon">◈</span><span>Materi belajar</span></button>
-          <button class="nav-item" data-view="exam"><span class="nav-icon">✦</span><span>HTML challenge</span><span class="nav-badge">30</span></button>
-        </nav>
-        <div class="sidebar-bottom">
-          <div class="lecturer-credit"><span class="credit-label">DOSEN PENGAMPU</span><strong>Rizki Muliono, S.Kom., M.Kom.</strong><span>Matakuliah: HTML</span></div>
-          <div class="streak-card"><div class="streak-icon">✺</div><div><strong>Keep exploring</strong><span>Progress kecil tetap berarti.</span></div></div>
-          <button id="logout-button" class="logout-button"><span>⇥</span> Keluar</button>
-          <p class="sidebar-version">HTMLLAB / v1.0.0</p>
-        </div>
-      </aside>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-      <main class="main-content">
-        <header class="topbar">
-          <div class="mobile-brand"><img class="campus-logo" src="assets/Logo_UMA_2026.png" alt="Logo Universitas Medan Area" /><span class="brand-symbol">&lt;/&gt;</span> HTML<span class="brand-accent">LAB</span></div>
-          <div class="topbar-context"><span class="live-pulse"></span> Learning mode <span class="slash">/</span> <span id="topbar-date"></span></div>
-          <div class="profile-chip"><div id="avatar" class="avatar">A</div><div><strong id="profile-name">Student</strong><span id="profile-npm">NPM</span></div><span class="profile-chevron">⌄</span></div>
-        </header>
-
-        <div id="dashboard-view" class="page-view"></div>
-        <div id="lesson-view" class="page-view hidden"></div>
-        <div id="exam-view" class="page-view hidden"></div>
-        <div id="result-view" class="page-view hidden"></div>
-      </main>
+  <section id="login-screen" class="login-screen">
+    <div class="login-visual">
+      <div class="visual-orbit orbit-one"></div>
+      <div class="visual-orbit orbit-two"></div>
+      <div class="visual-core"><span>&lt;/&gt;</span></div>
+      <div class="floating-tag tag-one">&lt;learn /&gt;</div>
+      <div class="floating-tag tag-two">30 TOPICS</div>
+      <div class="floating-tag tag-three">BUILD • TEST • GROW</div>
     </div>
+    <div class="login-panel">
+      <div class="brand-mark"><img class="campus-logo" src="assets/Logo_UMA_2026.png" alt="Logo Universitas Medan Area"
+          height="80px;" /><span class="brand-symbol">&lt;/&gt;</span><span>HTML<span
+            class="brand-accent">LAB</span></span></div>
+      <p class="eyebrow">LEARNING MANAGEMENT SYSTEM · 01</p>
+      <h1>Build your<br /><em>first web layer.</em></h1>
+      <p class="login-copy">Masuk ke ruang belajar interaktif dan kuasai HTML dari tag pertama sampai halaman web
+        lengkap melalui 30 materi dan challenge praktikal.</p>
+      <form id="login-form" class="login-form">
+        <label for="npm">Nomor Pokok Mahasiswa <span>*</span></label>
+        <input id="npm" name="npm" type="text" inputmode="numeric" autocomplete="username"
+          placeholder="Contoh: 231011234" required />
+        <label for="student-name">Nama lengkap <span>*</span></label>
+        <input id="student-name" name="student-name" type="text" autocomplete="name" placeholder="Tulis nama kamu"
+          required />
+        <button class="primary-button full-button" type="submit">Masuk ke LAB <span>↗</span></button>
+      </form>
+      <div class="login-footnote"><span class="status-dot"></span> Data progress tersimpan aman di perangkatmu</div>
+      <div class="lecturer-credit login-credit"><span class="credit-label">MATA KULIAH: HTML</span><strong>Rizki
+          Muliono, S.Kom., M.Kom.</strong><span>Dosen pengampu</span></div>
+      <div class="login-features"><span><strong>30</strong> materi</span><span><strong>30</strong>
+          challenge</span><span><strong>∞</strong> explore</span></div>
+    </div>
+  </section>
 
-    <div id="confetti" class="confetti" aria-hidden="true"></div>
-    <script src="config.js"></script>
-    <script src="course-data.js"></script>
-    <script src="app.js"></script>
-  </body>
+  <div id="app-shell" class="app-shell hidden">
+    <aside class="sidebar">
+      <div class="sidebar-brand"><img class="campus-logo" src="assets/Logo_UMA_2026.png"
+          alt="Logo Universitas Medan Area" height="60px;" /><span class="brand-symbol">&lt;/&gt;</span><span>HTML<span
+            class="brand-accent">LAB</span></span></div>
+      <div class="sidebar-label">YOUR SPACE</div>
+      <nav class="side-nav" aria-label="Navigasi utama">
+        <button class="nav-item active" data-view="dashboard"><span
+            class="nav-icon">⌂</span><span>Overview</span></button>
+        <button class="nav-item" data-view="lesson"><span class="nav-icon">◈</span><span>Materi belajar</span></button>
+        <button class="nav-item" data-view="exam"><span class="nav-icon">✦</span><span>HTML challenge</span><span
+            class="nav-badge">30</span></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="lecturer-credit"><span class="credit-label">DOSEN PENGAMPU</span><strong>Rizki Muliono, S.Kom.,
+            M.Kom.</strong><span>Matakuliah: HTML</span></div>
+        <div class="streak-card">
+          <div class="streak-icon">✺</div>
+          <div><strong>Keep exploring</strong><span>Progress kecil tetap berarti.</span></div>
+        </div>
+        <button id="logout-button" class="logout-button"><span>⇥</span> Keluar</button>
+        <p class="sidebar-version">HTMLLAB / v1.0.0</p>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <header class="topbar">
+        <div class="mobile-brand"><img class="campus-logo" src="assets/Logo_UMA_2026.png"
+            alt="Logo Universitas Medan Area" /><span class="brand-symbol">&lt;/&gt;</span> HTML<span
+            class="brand-accent">LAB</span></div>
+        <div class="topbar-context"><span class="live-pulse"></span> Learning mode <span class="slash">/</span> <span
+            id="topbar-date"></span></div>
+        <div class="profile-chip">
+          <div id="avatar" class="avatar">A</div>
+          <div><strong id="profile-name">Student</strong><span id="profile-npm">NPM</span></div><span
+            class="profile-chevron">⌄</span>
+        </div>
+      </header>
+
+      <div id="dashboard-view" class="page-view"></div>
+      <div id="lesson-view" class="page-view hidden"></div>
+      <div id="exam-view" class="page-view hidden"></div>
+      <div id="result-view" class="page-view hidden"></div>
+    </main>
+  </div>
+
+  <div id="confetti" class="confetti" aria-hidden="true"></div>
+  <script src="config.js"></script>
+  <script src="course-data.js"></script>
+  <script src="app.js"></script>
+</body>
+
 </html>
