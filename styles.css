@@ -337,6 +337,19 @@ body { font-size: 17px; }
 .module-detail-card { margin-top: 13px; }
 .module-detail-card .concept-body { grid-column: 1 / -1; }
 
+/* Stronger login orbital centerpiece */
+.login-visual { isolation: isolate; }
+.visual-core { z-index: 3; }
+.visual-orbit { z-index: 1; opacity: 1; border-width: 2px; filter: drop-shadow(0 0 12px rgba(8,127,152,.2)); }
+.orbit-one { border-color: rgba(8,127,152,.42); box-shadow: 0 0 24px rgba(8,127,152,.12), inset 0 0 18px rgba(8,127,152,.08); animation: orbitOneFloat 9s ease-in-out infinite; }
+.orbit-two { z-index: 2; border-color: rgba(104,72,204,.5); box-shadow: 0 0 26px rgba(104,72,204,.18), inset 0 0 20px rgba(104,72,204,.08); filter: drop-shadow(0 0 15px rgba(104,72,204,.24)); animation: orbitTwoFloat 8s ease-in-out infinite; }
+.orbit-two::before, .orbit-two::after { content: ''; position: absolute; display: block; width: 10px; height: 10px; border: 2px solid #6848cc; border-radius: 50%; background: #f5f7ff; box-shadow: 0 0 15px rgba(104,72,204,.8); }
+.orbit-two::before { top: 13%; left: 10%; }
+.orbit-two::after { right: 10%; bottom: 13%; width: 7px; height: 7px; border-color: #087f98; box-shadow: 0 0 15px rgba(8,127,152,.8); }
+.orbit-one::after { content: ''; position: absolute; right: 8%; top: 11%; width: 8px; height: 8px; border-radius: 50%; background: #087f98; box-shadow: 0 0 16px rgba(8,127,152,.9); }
+@keyframes orbitOneFloat { 0%, 100% { transform: rotate(35deg) translateY(0); } 50% { transform: rotate(39deg) translateY(-10px); } }
+@keyframes orbitTwoFloat { 0%, 100% { transform: rotate(-47deg) translateY(0) scale(1); } 50% { transform: rotate(-41deg) translateY(8px) scale(1.025); } }
+
 /* Dracula / Atom-inspired syntax theme */
 :root {
   --code-bg: #282a36;
