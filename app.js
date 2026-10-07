@@ -29,9 +29,9 @@
     };
   }
 
+  let activeTimerStartedAt = null;
   let state = loadState();
   let timerHandle = null;
-  let activeTimerStartedAt = null;
 
   function loadState() {
     try {
@@ -76,6 +76,16 @@
 
   function escapeHtml(value = '') {
     return String(value).replace(/[&<>'"]/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;' }[character]));
+  }
+
+  function highlightCode(code = '') {
+    const escaped = escapeHtml(code);
+    return escaped
+      .replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="syntax-comment">$1</span>')
+      .replace(/(&lt;\/?)([a-z][\w-]*)([^&]*?)(&gt;)/gi, (match, bracket, tag, attributes, close) => {
+        const styledAttributes = attributes.replace(/([a-z_:][\w:.-]*)(=)(&quot;.*?&quot;|&#039;.*?&#039;|[^\s]+)/gi, '<span class="syntax-attr">$1</span><span class="syntax-equals">$2</span><span class="syntax-string">$3</span>');
+        return `<span class="syntax-bracket">${bracket}</span><span class="syntax-tag">${tag}</span>${styledAttributes}<span class="syntax-bracket">${close}</span>`;
+      });
   }
 
   function normalize(value = '') {
@@ -199,7 +209,7 @@
     $('#lesson-view').innerHTML = `
       <section class="page-intro"><div><p class="eyebrow">LEARNING PATH / ${activeModule.number}</p><h2>${activeModule.title}<span class="hero-dot">.</span></h2><p>${activeModule.description} Pelajari konsepnya, lalu uji dengan prompt di akhir perjalanan.</p></div><div class="lesson-progress"><span>MODULE ${activeModule.number} / ${String(COURSE.modules.length).padStart(2, '0')}</span><strong>${Math.round((state.viewedModules.length / COURSE.modules.length) * 100)}%</strong><div class="progress-line"><span style="width:${Math.round((state.viewedModules.length / COURSE.modules.length) * 100)}%"></span></div></div></section>
       <div class="module-tabs">${COURSE.modules.map((module) => `<button class="module-tab ${module.id === activeModule.id ? 'active' : ''}" data-module-tab="${module.id}"><span>${module.number}</span>${module.title}</button>`).join('')}</div>
-      <section class="lesson-layout"><div class="lesson-main"><div class="lesson-banner"><span class="big-module-icon">${activeModule.icon}</span><div><p class="eyebrow">CONCEPT DROP</p><h3>${activeModule.title}</h3><p>${activeModule.description}</p></div></div><div class="concept-card module-detail-card"><div class="concept-body"><span class="concept-tag">Yang akan kamu kuasai</span><ul class="concept-points">${activeModule.details.map((detail) => `<li>${escapeHtml(detail)}</li>`).join('')}</ul></div></div><div class="concept-list">${moduleQuestions.map((question, index) => `<article class="concept-card"><div class="concept-index">${String(index + 1).padStart(2, '0')}</div><div class="concept-body"><span class="concept-tag">${question.lessonTitle}</span><p>${question.lessonBody}</p><div class="lesson-code"><div class="code-window-head"><span class="window-dots"><i></i><i></i><i></i></span><span>snippet.html</span></div><pre><code>${escapeHtml(question.lessonCode)}</code></pre></div></div></article>`).join('')}</div></div><aside class="lesson-aside"><div class="aside-sticky"><p class="eyebrow">CHECKPOINT</p><h3>Ready to<br /><em>test your flow?</em></h3><p>${moduleQuestions.length} challenge dari modul ini menunggumu di dalam ujian utama.</p><div class="checkpoint-count"><strong>${moduleQuestions.length}</strong><span>coding prompts</span></div><button class="primary-button full-button" data-action="start-exam">Go to challenge <span>↗</span></button></div></aside></section>
+      <section class="lesson-layout"><div class="lesson-main"><div class="lesson-banner"><span class="big-module-icon">${activeModule.icon}</span><div><p class="eyebrow">CONCEPT DROP</p><h3>${activeModule.title}</h3><p>${activeModule.description}</p></div></div><div class="concept-card module-detail-card"><div class="concept-body"><span class="concept-tag">Yang akan kamu kuasai</span><ul class="concept-points">${activeModule.details.map((detail) => `<li>${escapeHtml(detail)}</li>`).join('')}</ul></div></div><div class="concept-list">${moduleQuestions.map((question, index) => `<article class="concept-card"><div class="concept-index">${String(index + 1).padStart(2, '0')}</div><div class="concept-body"><span class="concept-tag">${question.lessonTitle}</span><p>${question.lessonBody}</p><div class="lesson-code"><div class="code-window-head"><span class="window-dots"><i></i><i></i><i></i></span><span>snippet.html</span><span class="code-lang">DRACULA</span></div><pre><code>${highlightCode(question.lessonCode)}</code></pre></div></div></article>`).join('')}</div></div><aside class="lesson-aside"><div class="aside-sticky"><p class="eyebrow">CHECKPOINT</p><h3>Ready to<br /><em>test your flow?</em></h3><p>${moduleQuestions.length} challenge dari modul ini menunggumu di dalam ujian utama.</p><div class="checkpoint-count"><strong>${moduleQuestions.length}</strong><span>coding prompts</span></div><button class="primary-button full-button" data-action="start-exam">Go to challenge <span>↗</span></button></div></aside></section>
     `;
     $$('[data-module-tab]').forEach((tab) => tab.addEventListener('click', () => { state.selectedModule = tab.dataset.moduleTab; renderLesson(); }));
     $('[data-action="start-exam"]').addEventListener('click', () => startExam());
@@ -329,7 +339,7 @@
     $('#exam-view').innerHTML = `
       <section class="exam-topline"><div><p class="eyebrow">HTML CHALLENGE / LIVE SESSION</p><h2>Complete the layer<span class="hero-dot">.</span></h2></div><div class="exam-clock"><span class="clock-icon">◷</span><div><span>ACTIVE ELAPSED TIME</span><strong id="elapsed-time">${formatDuration(getElapsedSeconds())}</strong></div></div></section>
       <div class="exam-progress-row"><span>CHALLENGE <strong>${String(state.currentIndex + 1).padStart(2, '0')}</strong> / ${String(state.questionOrder.length).padStart(2, '0')}</span><span>${progress}% complete · active time only</span></div><div class="exam-progress"><span style="width:${progress}%"></span></div>
-      <section class="exam-grid"><div class="lesson-panel"><div class="panel-label"><span class="label-dot"></span> ${visualChallenge ? 'SEE & BUILD' : 'BEFORE YOU CODE'} <span class="panel-module">${COURSE.modules.find((module) => module.id === question.module)?.title || 'HTML'}</span></div><h3>${question.lessonTitle}</h3><p>${visualChallenge ? 'Amati output browser, baca clue, lalu tulis struktur HTML yang dapat menghasilkan tampilan tersebut.' : question.lessonBody}</p>${lessonVisual}</div><div class="question-panel"><div class="question-number">Q${String(state.currentIndex + 1).padStart(2, '0')} <span>of ${String(state.questionOrder.length).padStart(2, '0')}</span></div><h3>${question.title}</h3><p class="question-prompt">${visualPrompt}</p><div class="editor-shell ${feedback ? (feedback.passed ? 'passed' : 'failed') : ''}"><div class="editor-head"><span><i></i> answer.html</span><div class="editor-tools"><button type="button" data-editor-action="reset">Reset</button><span class="editor-type">TYPE MANUALLY</span></div></div><textarea id="answer-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" aria-label="Kode jawaban">${escapeHtml(state.answers[question.id] || question.starter)}</textarea><div class="editor-foot"><span>Type manually · ⌘ / Ctrl + Enter to check</span><button id="check-answer" class="check-button">Check code <span>↗</span></button></div></div><div class="clipboard-lock"><span>⌁</span> Copy-paste, cut, dan drag-drop kode dinonaktifkan untuk challenge ini.</div><div class="preview-card"><div class="preview-head"><span><span class="label-dot"></span> LIVE PREVIEW</span><span>lihat hasil HTML kamu</span></div><iframe id="live-preview" title="Preview hasil kode HTML" sandbox=""></iframe></div>${feedback ? `<div class="feedback ${feedback.passed ? 'success' : 'error'}"><span>${feedback.passed ? '✓' : '!'}</span><div><strong>${feedback.passed ? 'Looks good!' : 'Keep iterating'}</strong><p>${feedback.message}</p></div></div>` : ''}<div class="question-actions"><button id="prev-question" class="secondary-button" ${state.currentIndex === 0 ? 'disabled' : ''}>← Previous</button><button id="next-question" class="primary-button">${state.currentIndex === state.questionOrder.length - 1 ? 'Finish test' : 'Next prompt'} <span>→</span></button></div></div></section>
+      <section class="exam-grid"><div class="lesson-panel"><div class="panel-label"><span class="label-dot"></span> ${visualChallenge ? 'SEE & BUILD' : 'BEFORE YOU CODE'} <span class="panel-module">${COURSE.modules.find((module) => module.id === question.module)?.title || 'HTML'}</span></div><h3>${question.lessonTitle}</h3><p>${visualChallenge ? 'Amati output browser, baca clue, lalu tulis struktur HTML yang dapat menghasilkan tampilan tersebut.' : question.lessonBody}</p>${visualChallenge ? lessonVisual : `<div class="lesson-code large"><div class="code-window-head"><span class="window-dots"><i></i><i></i><i></i></span><span>concept.html</span><span class="code-lang">DRACULA</span></div><pre><code>${highlightCode(question.lessonCode)}</code></pre></div><div class="insight"><span>✦</span><span><strong>Quick insight</strong>${question.hint}</span></div>`}</div><div class="question-panel"><div class="question-number">Q${String(state.currentIndex + 1).padStart(2, '0')} <span>of ${String(state.questionOrder.length).padStart(2, '0')}</span></div><h3>${question.title}</h3><p class="question-prompt">${visualPrompt}</p><div class="editor-shell ${feedback ? (feedback.passed ? 'passed' : 'failed') : ''}"><div class="editor-head"><span><i></i> answer.html</span><div class="editor-tools"><button type="button" data-editor-action="reset">Reset</button><span class="editor-type">TYPE MANUALLY</span></div></div><textarea id="answer-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" aria-label="Kode jawaban">${escapeHtml(state.answers[question.id] || question.starter)}</textarea><div class="editor-foot"><span>Type manually · ⌘ / Ctrl + Enter to check</span><button id="check-answer" class="check-button">Check code <span>↗</span></button></div></div><div class="clipboard-lock"><span>⌁</span> Copy-paste, cut, dan drag-drop kode dinonaktifkan untuk challenge ini.</div><div class="preview-card"><div class="preview-head"><span><span class="label-dot"></span> LIVE PREVIEW</span><span>lihat hasil HTML kamu</span></div><iframe id="live-preview" title="Preview hasil kode HTML" sandbox=""></iframe></div>${feedback ? `<div class="feedback ${feedback.passed ? 'success' : 'error'}"><span>${feedback.passed ? '✓' : '!'}</span><div><strong>${feedback.passed ? 'Looks good!' : 'Keep iterating'}</strong><p>${feedback.message}</p></div></div>` : ''}<div class="question-actions"><button id="prev-question" class="secondary-button" ${state.currentIndex === 0 ? 'disabled' : ''}>← Previous</button><button id="next-question" class="primary-button">${state.currentIndex === state.questionOrder.length - 1 ? 'Finish test' : 'Next prompt'} <span>→</span></button></div></div></section>
     `;
     bindExamEvents(question);
     startTimer();
@@ -397,14 +407,26 @@
   }
 
   function startTimer() {
-    stopTimer();
+    if (!state.startedAt || state.finishedAt || document.hidden) return;
+    if (!activeTimerStartedAt) activeTimerStartedAt = Date.now();
+    if (timerHandle) window.clearInterval(timerHandle);
     timerHandle = window.setInterval(() => {
       const element = $('#elapsed-time');
-      if (element && state.startedAt) element.textContent = formatDuration((Date.now() - state.startedAt) / 1000);
+      if (element && state.startedAt) element.textContent = formatDuration(getElapsedSeconds());
     }, 1000);
   }
 
+  function getElapsedSeconds() {
+    const liveSeconds = activeTimerStartedAt ? (Date.now() - activeTimerStartedAt) / 1000 : 0;
+    return (state.elapsedSeconds || 0) + liveSeconds;
+  }
+
   function stopTimer() {
+    if (activeTimerStartedAt) {
+      state.elapsedSeconds = Math.max(0, (state.elapsedSeconds || 0) + ((Date.now() - activeTimerStartedAt) / 1000));
+      activeTimerStartedAt = null;
+      persist();
+    }
     if (timerHandle) window.clearInterval(timerHandle);
     timerHandle = null;
   }
@@ -412,7 +434,7 @@
   function finishExam() {
     stopTimer();
     const passedCount = COURSE.questions.filter((question) => validateQuestion(question, state.answers[question.id] || '').passed).length;
-    const durationSeconds = Math.round((Date.now() - state.startedAt) / 1000);
+    const durationSeconds = Math.round(state.elapsedSeconds || 0);
     state.finishedAt = Date.now();
     state.lastResult = { score: Math.round((passedCount / COURSE.questions.length) * 100), passedCount, total: COURSE.questions.length, durationSeconds, completedAt: new Date().toISOString() };
     state.view = 'result';
@@ -434,7 +456,7 @@
     const result = state.lastResult;
     if (!result) { setView('dashboard'); return; }
     const headline = result.score >= 80 ? 'You nailed it.' : result.score >= 60 ? 'Solid first run.' : 'Keep building.';
-    $('#result-view').innerHTML = `<section class="result-page"><div class="result-glow"></div><p class="eyebrow">SESSION COMPLETE / ${formatDate(new Date(result.completedAt))}</p><h2>${headline}<span class="hero-dot">.</span></h2><p class="result-lead">Setiap baris kode yang kamu tulis adalah satu langkah lebih dekat menuju web yang kamu bayangkan.</p><div class="result-score-card"><div class="score-ring" style="--score:${result.score * 3.6}deg"><div><strong>${result.score}</strong><span>/ 100</span></div></div><div class="result-details"><span class="eyebrow">YOUR SIGNAL</span><h3>${result.passedCount} dari ${result.total} challenge passed</h3><div class="result-metrics"><span><strong>${formatDuration(result.durationSeconds)}</strong><small>elapsed time</small></span><span><strong>${result.score >= 80 ? 'A' : result.score >= 60 ? 'B' : 'C'}</strong><small>skill signal</small></span></div></div></div><div class="result-actions"><button class="primary-button" data-action="retry">Try another run <span>↗</span></button><button class="secondary-button" data-action="home">Back to overview</button></div><p class="result-note"><span>✦</span> Hasil ini sudah tersimpan di progress lokal kamu${window.APP_CONFIG?.apiUrl ? ' dan dikirim ke learning database.' : '.'}</p></section>`;
+    $('#result-view').innerHTML = `<section class="result-page"><div class="result-glow"></div><p class="eyebrow">SESSION COMPLETE / ${formatDate(new Date(result.completedAt))}</p><h2>${headline}<span class="hero-dot">.</span></h2><p class="result-lead">Setiap baris kode yang kamu tulis adalah satu langkah lebih dekat menuju web yang kamu bayangkan.</p><div class="result-score-card"><div class="score-ring" style="--score:${result.score * 3.6}deg"><div><strong>${result.score}</strong><span>/ 100</span></div></div><div class="result-details"><span class="eyebrow">YOUR SIGNAL</span><h3>${result.passedCount} dari ${result.total} challenge passed</h3><div class="result-metrics"><span><strong>${formatDuration(result.durationSeconds)}</strong><small>active elapsed time</small></span><span><strong>${result.score >= 80 ? 'A' : result.score >= 60 ? 'B' : 'C'}</strong><small>skill signal</small></span></div></div></div><div class="result-actions"><button class="primary-button" data-action="retry">Try another run <span>↗</span></button><button class="secondary-button" data-action="home">Back to overview</button></div><p class="result-note"><span>✦</span> Hasil ini sudah tersimpan di progress lokal kamu${window.APP_CONFIG?.apiUrl ? ' dan dikirim ke learning database.' : '.'}</p></section>`;
     $('#result-view [data-action="retry"]').addEventListener('click', () => { state.questionOrder = []; state.finishedAt = null; state.lastResult = null; persist(); startExam(); });
     $('#result-view [data-action="home"]').addEventListener('click', () => setView('dashboard'));
     launchConfetti();
@@ -472,6 +494,13 @@
     if (item.dataset.view === 'exam' && !state.questionOrder.length) setView('exam');
     else setView(item.dataset.view);
   }));
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) stopTimer();
+    else if (state.user && state.view === 'exam' && state.questionOrder.length && !state.finishedAt) startTimer();
+  });
+  window.addEventListener('pagehide', stopTimer);
+  window.addEventListener('beforeunload', stopTimer);
 
   renderShell();
 })();

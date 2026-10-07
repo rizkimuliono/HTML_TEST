@@ -337,6 +337,28 @@ body { font-size: 17px; }
 .module-detail-card { margin-top: 13px; }
 .module-detail-card .concept-body { grid-column: 1 / -1; }
 
+/* Dracula / Atom-inspired syntax theme */
+:root {
+  --code-bg: #282a36;
+  --code-header: #343746;
+  --code-text: #f8f8f2;
+  --syntax-pink: #ff79c6;
+  --syntax-purple: #bd93f9;
+  --syntax-cyan: #8be9fd;
+  --syntax-green: #50fa7b;
+  --syntax-yellow: #f1fa8c;
+  --syntax-orange: #ffb86c;
+  --syntax-comment: #6272a4;
+}
+.hero-code, .lesson-code, .editor-shell { background: var(--code-bg); border-color: rgba(189,147,249,.35); box-shadow: 0 22px 50px rgba(40,42,54,.18); }
+.code-window-head, .editor-head { background: var(--code-header); border-bottom-color: rgba(189,147,249,.2); color: #bdc3d7; }
+.code-lang, .editor-type { color: var(--syntax-pink); }
+.hero-code pre, .lesson-code pre { color: var(--code-text); }
+.syntax-bracket { color: var(--syntax-cyan); }.syntax-tag { color: var(--syntax-pink); }.syntax-attr { color: var(--syntax-green); }.syntax-equals { color: var(--syntax-cyan); }.syntax-string { color: var(--syntax-yellow); }.syntax-comment { color: var(--syntax-comment); font-style: italic; }
+.editor-head span:first-child { color: #f8f8f2; }.editor-head i { background: var(--syntax-purple); }.editor-shell textarea { color: #f8f8f2; caret-color: var(--syntax-pink); }.editor-shell textarea::selection { background: rgba(189,147,249,.35); }
+.editor-tools button { border-color: rgba(189,147,249,.32); background: rgba(255,255,255,.05); color: #d3d6e8; }.editor-tools button:hover { border-color: var(--syntax-pink); color: var(--syntax-pink); background: rgba(255,121,198,.1); }
+.code-status { color: #a9b1ca; border-top-color: rgba(189,147,249,.15); }.code-status .status-dot { background: var(--syntax-green); box-shadow: 0 0 10px var(--syntax-green); }
+
 @media (max-width: 760px) {
   .login-panel { padding: 23px; }
   .login-panel h1 { font-size: 52px; }
