@@ -152,6 +152,19 @@ button:disabled { cursor: not-allowed; opacity: .35; }
 .editor-shell textarea { user-select: text; -webkit-user-select: text; }
 .clipboard-lock { display: flex; align-items: center; gap: 7px; margin-top: 8px; color: #9a6480; font-family: var(--mono); font-size: 9px; }
 .clipboard-lock > span { color: var(--danger); font-size: 14px; }
+.visual-target { overflow: hidden; border: 1px solid rgba(104, 72, 204, .22); border-radius: 10px; background: #ffffff; box-shadow: 0 12px 28px rgba(44, 62, 120, .08); }
+.visual-target-head { display: flex; align-items: center; gap: 10px; height: 37px; padding: 0 14px; border-bottom: 1px solid rgba(43, 57, 112, .12); color: #667391; font-family: var(--mono); font-size: 9px; }
+.visual-target-head .code-lang { margin-left: auto; color: var(--cyan); }
+.target-browser { display: grid; place-items: center; min-height: 170px; padding: 25px; color: #19213f; text-align: center; }
+.target-browser h1, .target-browser h2 { margin: 0; color: #19213f; font-family: var(--sans); line-height: 1.1; letter-spacing: -.05em; }
+.target-browser h1 { font-size: 28px; }.target-browser h2 { font-size: 22px; }
+.target-browser p { margin: 0; color: #5e698a; font-family: var(--sans); font-size: 14px; line-height: 1.5; }
+.target-browser a { color: #087f98; font-family: var(--sans); font-size: 14px; font-weight: 600; text-decoration: underline; }
+.target-browser ul, .target-browser ol { margin: 0; padding-left: 24px; color: #19213f; font-family: var(--sans); font-size: 14px; line-height: 1.9; text-align: left; }
+.target-browser nav { display: flex; justify-content: center; width: 100%; padding: 14px 20px; border-radius: 10px; background: #eef8fa; }
+.target-browser section { width: 100%; padding: 20px; border: 1px solid #dfe4f2; border-radius: 10px; background: #f8f9ff; text-align: left; }
+.target-browser section h2 { margin-bottom: 4px; }.target-browser label { display: inline-block; margin-right: 8px; color: #354163; font-size: 12px; }.target-browser input { width: 160px; height: 31px; padding: 0 8px; border: 1px solid #cbd3e8; border-radius: 6px; background: #fff; }.target-browser button { padding: 9px 14px; border: 0; border-radius: 7px; background: #087f98; color: #fff; font-size: 12px; font-weight: 600; }
+.visual-clue { display: flex; gap: 10px; align-items: flex-start; padding: 12px 15px; border-top: 1px solid #e6e9f3; background: #f7f9ed; color: #668d18; }.visual-clue > span { font-size: 15px; }.visual-clue strong { display: block; margin-bottom: 2px; font-family: var(--mono); font-size: 8px; letter-spacing: .12em; }.visual-clue p { margin: 0; color: #64743b; font-size: 10px; line-height: 1.45; }
 .confetti { position: fixed; inset: 0; z-index: 8; pointer-events: none; overflow: hidden; }.confetti i { position: absolute; top: -15px; left: var(--x); width: 7px; height: 13px; background: hsl(var(--hue), 85%, 70%); animation: fall 2.8s var(--delay) ease-in forwards; }
 @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 @keyframes fall { to { transform: translate3d(20px, 105vh, 0) rotate(620deg); opacity: 0; } }
