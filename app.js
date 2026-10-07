@@ -50,6 +50,20 @@
     const candidate = { ...createDefaultState(), ...saved };
     candidate.elapsedSeconds = Number.isFinite(Number(candidate.elapsedSeconds)) ? Number(candidate.elapsedSeconds) : 0;
     activeTimerStartedAt = null;
+    const validQuestionIds = new Set(COURSE.questions.map((question) => question.id));
+    const validModuleIds = new Set(COURSE.modules.map((module) => module.id));
+    candidate.viewedModules = (candidate.viewedModules || []).filter((moduleId) => validModuleIds.has(moduleId));
+    const hasStaleExam = candidate.questionOrder?.length && (candidate.questionOrder.length !== COURSE.questions.length || candidate.questionOrder.some((questionId) => !validQuestionIds.has(questionId)));
+    if (hasStaleExam) {
+      candidate.questionOrder = [];
+      candidate.currentIndex = 0;
+      candidate.answers = {};
+      candidate.feedback = {};
+      candidate.startedAt = null;
+      candidate.elapsedSeconds = 0;
+      candidate.finishedAt = null;
+      candidate.lastResult = null;
+    }
     return candidate.courseSlug === COURSE.slug ? candidate : createDefaultState(candidate.user || null);
   }
 
@@ -151,7 +165,7 @@
     const completed = state.lastResult ? state.lastResult.score : 0;
     const viewed = state.viewedModules.length;
     const learningPercent = Math.round((viewed / COURSE.modules.length) * 100);
-    const hasExam = state.questionOrder.length > 0 && !state.finishedAt;
+    const hasExam = hasCurrentExam() && !state.finishedAt;
     $('#dashboard-view').innerHTML = `
       <section class="hero-section">
         <div class="hero-copy">
@@ -182,14 +196,14 @@
         return `<button class="module-card ${isViewed ? 'is-complete' : ''}" data-module="${module.id}"><div class="module-card-top"><span class="module-number">${module.number}</span><span class="module-icon">${module.icon}</span></div><h4>${module.title}</h4><p>${module.description}</p><div class="module-card-foot"><span>${isViewed ? 'Explored' : `${index === 0 ? 'Start here' : 'Next step'}`}</span><span class="module-arrow">↗</span></div></button>`;
       }).join('')}</section>
 
-      <section class="bottom-rail"><div class="quote-card"><span class="quote-mark">“</span><p>The web is not a collection of pages. It is a conversation.</p><span class="quote-author">— HTML LAB / FIELD NOTE 001</span></div><div class="challenge-card"><div><p class="eyebrow">PRACTICE ZONE</p><h3>${hasExam ? 'Your challenge is in progress' : '20 prompts. 1 skill stack.'}</h3><p>Lengkapi kode, cek jawaban, dan lihat sejauh mana skill kamu berkembang.</p></div><span class="challenge-orb">✦</span></div></section>
+      <section class="bottom-rail"><div class="quote-card"><span class="quote-mark">“</span><p>The web is not a collection of pages. It is a conversation.</p><span class="quote-author">— HTML LAB / FIELD NOTE 001</span></div><div class="challenge-card"><div><p class="eyebrow">PRACTICE ZONE</p><h3>${hasExam ? 'Your challenge is in progress' : `${COURSE.questions.length} prompts. 1 skill stack.`}</h3><p>Lengkapi kode, cek jawaban, dan lihat sejauh mana skill kamu berkembang.</p></div><span class="challenge-orb">✦</span></div></section>
     `;
     bindDashboardEvents();
   }
 
   function bindDashboardEvents() {
     $('[data-action="start-learning"]')?.addEventListener('click', () => {
-      if (state.questionOrder.length > 0 && !state.finishedAt) setView('exam');
+      if (hasCurrentExam() && !state.finishedAt) setView('exam');
       else startExam();
     });
     $$('[data-module]').forEach((button) => button.addEventListener('click', () => {
@@ -217,7 +231,7 @@
   }
 
   function startExam() {
-    if (!state.questionOrder.length || state.finishedAt) {
+    if (!hasCurrentExam() || state.finishedAt) {
       state.questionOrder = shuffle(COURSE.questions.map((question) => question.id));
       state.currentIndex = 0;
       state.answers = {};
@@ -230,6 +244,11 @@
       persist();
     }
     setView('exam');
+  }
+
+  function hasCurrentExam() {
+    const validQuestionIds = new Set(COURSE.questions.map((question) => question.id));
+    return state.questionOrder.length === COURSE.questions.length && state.questionOrder.every((questionId) => validQuestionIds.has(questionId));
   }
 
   function currentQuestion() {
@@ -326,6 +345,19 @@
   }
 
   function renderExam() {
+    if (state.questionOrder.length && !hasCurrentExam()) {
+      state.questionOrder = [];
+      state.currentIndex = 0;
+      state.answers = {};
+      state.feedback = {};
+      state.startedAt = null;
+      state.elapsedSeconds = 0;
+      state.finishedAt = null;
+      state.lastResult = null;
+      persist();
+      startExam();
+      return;
+    }
     if (!state.questionOrder.length || state.finishedAt) {
       $('#exam-view').innerHTML = `<div class="empty-state"><span>✦</span><h2>Your challenge awaits.</h2><p>Mulai ujian untuk mendapatkan ${COURSE.questions.length} prompt HTML yang diacak.</p><button class="primary-button" data-action="begin">Begin challenge ↗</button></div>`;
       $('[data-action="begin"]').addEventListener('click', startExam);
@@ -532,7 +564,7 @@
   });
 
   $$('.nav-item').forEach((item) => item.addEventListener('click', () => {
-    if (item.dataset.view === 'exam' && !state.questionOrder.length) setView('exam');
+    if (item.dataset.view === 'exam' && !hasCurrentExam()) setView('exam');
     else setView(item.dataset.view);
   }));
 
