@@ -5,37 +5,72 @@
   const COURSE_CHECKS = window.COURSE_CHECKS || {};
   const VISUAL_CHALLENGES = window.VISUAL_CHALLENGES || {};
   const STORAGE_KEY = 'htmllab-state-v1';
+  const PROFILE_STORAGE_KEY = 'htmllab-profiles-v2';
+  const ACTIVE_PROFILE_KEY = 'htmllab-active-profile-v2';
   const RESULT_KEY = 'htmllab-results-v1';
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 
-  const defaultState = {
-    user: null,
-    view: 'dashboard',
-    selectedModule: COURSE.modules[0].id,
-    viewedModules: [],
-    questionOrder: [],
-    currentIndex: 0,
-    answers: {},
-    feedback: {},
-    startedAt: null,
-    finishedAt: null,
-    lastResult: null
-  };
+  function createDefaultState(user = null) {
+    return {
+      courseSlug: COURSE.slug,
+      user,
+      view: 'dashboard',
+      selectedModule: COURSE.modules[0].id,
+      viewedModules: [],
+      questionOrder: [],
+      currentIndex: 0,
+      answers: {},
+      feedback: {},
+      startedAt: null,
+      elapsedSeconds: 0,
+      finishedAt: null,
+      lastResult: null
+    };
+  }
 
   let state = loadState();
   let timerHandle = null;
+  let activeTimerStartedAt = null;
 
   function loadState() {
     try {
+      const profiles = JSON.parse(localStorage.getItem(PROFILE_STORAGE_KEY) || '{}');
+      const activeProfile = localStorage.getItem(ACTIVE_PROFILE_KEY);
+      if (activeProfile && profiles[activeProfile]) return hydrateState(profiles[activeProfile]);
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      return saved ? { ...defaultState, ...saved } : { ...defaultState };
+      return saved ? hydrateState(saved) : createDefaultState();
     } catch (error) {
-      return { ...defaultState };
+      return createDefaultState();
     }
   }
 
+  function hydrateState(saved) {
+    const candidate = { ...createDefaultState(), ...saved };
+    candidate.elapsedSeconds = Number.isFinite(Number(candidate.elapsedSeconds)) ? Number(candidate.elapsedSeconds) : 0;
+    activeTimerStartedAt = null;
+    return candidate.courseSlug === COURSE.slug ? candidate : createDefaultState(candidate.user || null);
+  }
+
+  function profileKey(user) {
+    return `${String(user.npm).trim().toLowerCase()}::${String(user.name).trim().toLowerCase()}`;
+  }
+
+  function readProfiles() {
+    try { return JSON.parse(localStorage.getItem(PROFILE_STORAGE_KEY) || '{}'); } catch (error) { return {}; }
+  }
+
+  function loadProfile(user) {
+    const profiles = readProfiles();
+    return profiles[profileKey(user)] ? hydrateState({ ...profiles[profileKey(user)], user }) : null;
+  }
+
   function persist() {
+    if (!state.user) return;
+    const profiles = readProfiles();
+    profiles[profileKey(state.user)] = state;
+    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profiles));
+    localStorage.setItem(ACTIVE_PROFILE_KEY, profileKey(state.user));
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
 
@@ -126,7 +161,7 @@
 
       <section class="stat-grid">
         <div class="stat-card"><div class="stat-icon cyan">✦</div><div><span class="stat-label">Learning progress</span><strong>${learningPercent}<small>%</small></strong><div class="mini-progress"><span style="width:${learningPercent}%"></span></div></div></div>
-        <div class="stat-card"><div class="stat-icon violet">⌁</div><div><span class="stat-label">Total challenges</span><strong>20<small> soal</small></strong><span class="stat-sub">Coding based</span></div></div>
+        <div class="stat-card"><div class="stat-icon violet">⌁</div><div><span class="stat-label">Total challenges</span><strong>${COURSE.questions.length}<small> soal</small></strong><span class="stat-sub">1 soal / 1 materi</span></div></div>
         <div class="stat-card"><div class="stat-icon lime">◉</div><div><span class="stat-label">Last score</span><strong>${state.lastResult ? completed : '--'}<small>${state.lastResult ? '/ 100' : ' belum ada'}</small></strong><span class="stat-sub">${state.lastResult ? formatDate(new Date(state.lastResult.completedAt)) : 'Your first run awaits'}</span></div></div>
       </section>
 
@@ -162,9 +197,9 @@
     }
     const moduleQuestions = COURSE.questions.filter((question) => question.module === activeModule.id);
     $('#lesson-view').innerHTML = `
-      <section class="page-intro"><div><p class="eyebrow">LEARNING PATH / ${activeModule.number}</p><h2>${activeModule.title}<span class="hero-dot">.</span></h2><p>${activeModule.description} Pelajari konsepnya, lalu uji dengan prompt di akhir perjalanan.</p></div><div class="lesson-progress"><span>MODULE ${activeModule.number} / 04</span><strong>${Math.round((state.viewedModules.length / COURSE.modules.length) * 100)}%</strong><div class="progress-line"><span style="width:${Math.round((state.viewedModules.length / COURSE.modules.length) * 100)}%"></span></div></div></section>
+      <section class="page-intro"><div><p class="eyebrow">LEARNING PATH / ${activeModule.number}</p><h2>${activeModule.title}<span class="hero-dot">.</span></h2><p>${activeModule.description} Pelajari konsepnya, lalu uji dengan prompt di akhir perjalanan.</p></div><div class="lesson-progress"><span>MODULE ${activeModule.number} / ${String(COURSE.modules.length).padStart(2, '0')}</span><strong>${Math.round((state.viewedModules.length / COURSE.modules.length) * 100)}%</strong><div class="progress-line"><span style="width:${Math.round((state.viewedModules.length / COURSE.modules.length) * 100)}%"></span></div></div></section>
       <div class="module-tabs">${COURSE.modules.map((module) => `<button class="module-tab ${module.id === activeModule.id ? 'active' : ''}" data-module-tab="${module.id}"><span>${module.number}</span>${module.title}</button>`).join('')}</div>
-      <section class="lesson-layout"><div class="lesson-main"><div class="lesson-banner"><span class="big-module-icon">${activeModule.icon}</span><div><p class="eyebrow">CONCEPT DROP</p><h3>${activeModule.title}</h3><p>${activeModule.description}</p></div></div><div class="concept-list">${moduleQuestions.map((question, index) => `<article class="concept-card"><div class="concept-index">0${index + 1}</div><div class="concept-body"><span class="concept-tag">${question.lessonTitle}</span><p>${question.lessonBody}</p><div class="lesson-code"><div class="code-window-head"><span class="window-dots"><i></i><i></i><i></i></span><span>snippet.html</span></div><pre><code>${escapeHtml(question.lessonCode)}</code></pre></div></div></article>`).join('')}</div></div><aside class="lesson-aside"><div class="aside-sticky"><p class="eyebrow">CHECKPOINT</p><h3>Ready to<br /><em>test your flow?</em></h3><p>${moduleQuestions.length} challenge dari modul ini menunggumu di dalam ujian utama.</p><div class="checkpoint-count"><strong>${moduleQuestions.length}</strong><span>coding prompts</span></div><button class="primary-button full-button" data-action="start-exam">Go to challenge <span>↗</span></button></div></aside></section>
+      <section class="lesson-layout"><div class="lesson-main"><div class="lesson-banner"><span class="big-module-icon">${activeModule.icon}</span><div><p class="eyebrow">CONCEPT DROP</p><h3>${activeModule.title}</h3><p>${activeModule.description}</p></div></div><div class="concept-card module-detail-card"><div class="concept-body"><span class="concept-tag">Yang akan kamu kuasai</span><ul class="concept-points">${activeModule.details.map((detail) => `<li>${escapeHtml(detail)}</li>`).join('')}</ul></div></div><div class="concept-list">${moduleQuestions.map((question, index) => `<article class="concept-card"><div class="concept-index">${String(index + 1).padStart(2, '0')}</div><div class="concept-body"><span class="concept-tag">${question.lessonTitle}</span><p>${question.lessonBody}</p><div class="lesson-code"><div class="code-window-head"><span class="window-dots"><i></i><i></i><i></i></span><span>snippet.html</span></div><pre><code>${escapeHtml(question.lessonCode)}</code></pre></div></div></article>`).join('')}</div></div><aside class="lesson-aside"><div class="aside-sticky"><p class="eyebrow">CHECKPOINT</p><h3>Ready to<br /><em>test your flow?</em></h3><p>${moduleQuestions.length} challenge dari modul ini menunggumu di dalam ujian utama.</p><div class="checkpoint-count"><strong>${moduleQuestions.length}</strong><span>coding prompts</span></div><button class="primary-button full-button" data-action="start-exam">Go to challenge <span>↗</span></button></div></aside></section>
     `;
     $$('[data-module-tab]').forEach((tab) => tab.addEventListener('click', () => { state.selectedModule = tab.dataset.moduleTab; renderLesson(); }));
     $('[data-action="start-exam"]').addEventListener('click', () => startExam());
@@ -177,6 +212,8 @@
       state.answers = {};
       state.feedback = {};
       state.startedAt = Date.now();
+      state.elapsedSeconds = 0;
+      activeTimerStartedAt = null;
       state.finishedAt = null;
       state.lastResult = null;
       persist();
@@ -213,7 +250,24 @@
     const element = firstElement(documentFragment, check.tag);
     const text = cleanText(check.text);
     if (check.kind === 'doctype') return { passed: documentFragment.doctype?.name?.toLowerCase() === 'html', message: 'Tambahkan <!doctype html> di awal kode.' };
+    if (check.kind === 'hasTags') {
+      const missing = check.tags.find((tag) => !documentFragment.querySelector(tag));
+      return { passed: !missing, message: missing ? `Tambahkan tag <${missing}> pada struktur HTML.` : 'Semua tag yang dibutuhkan sudah ada.' };
+    }
     if (check.kind === 'attribute') return { passed: Boolean(element && element.getAttribute(check.attr)?.trim().toLowerCase() === check.value.toLowerCase()), message: `Pastikan tag ${check.tag} memiliki atribut ${check.attr}="${check.value}".` };
+    if (check.kind === 'hasAttribute') {
+      const matches = Array.from(documentFragment.querySelectorAll(check.tag)).some((item) => check.value === undefined ? item.hasAttribute(check.attr) : item.getAttribute(check.attr)?.trim().toLowerCase() === check.value.toLowerCase());
+      return { passed: matches, message: `Pastikan tag ${check.tag} memiliki attribute ${check.attr}${check.value ? `="${check.value}"` : ''}.` };
+    }
+    if (check.kind === 'hasAttributes') {
+      const missing = check.attrs.find((item) => !documentFragment.querySelector(`${item.tag}[${item.attr}]`));
+      return { passed: !missing, message: missing ? `Pastikan ${missing.tag} memiliki attribute ${missing.attr}.` : 'Attribute form sudah lengkap.' };
+    }
+    if (check.kind === 'inputTypes') {
+      const types = new Set(Array.from(documentFragment.querySelectorAll('input')).map((input) => input.getAttribute('type')?.toLowerCase()));
+      const missing = check.values.find((type) => !types.has(type));
+      return { passed: !missing, message: missing ? `Tambahkan input dengan type="${missing}".` : 'Semua jenis input sudah tersedia.' };
+    }
     if (check.kind === 'elementText') return { passed: Boolean(element && cleanText(element.textContent) === text), message: `Gunakan tag ${check.tag} dengan isi “${check.text}”.` };
     if (check.kind === 'containsText') return { passed: Boolean(element && cleanText(element.textContent).includes(text)), message: `Bungkus teks “${check.text}” dengan tag ${check.tag}.` };
     if (check.kind === 'containsElementText') return { passed: Boolean(documentFragment.querySelector(check.parent)?.querySelector(check.child) && cleanText(documentFragment.querySelector(check.parent).querySelector(check.child).textContent) === text), message: `Pastikan ${check.child} “${check.text}” berada di dalam ${check.parent}.` };
@@ -226,7 +280,7 @@
     if (check.kind === 'labelInput') {
       const label = documentFragment.querySelector(`label[for="${check.labelFor}"]`);
       const input = documentFragment.querySelector(`input#${check.inputId}`);
-      return { passed: Boolean(label && input && cleanText(label.textContent) === text), message: 'Hubungkan label dan input memakai for="full-name" serta id="full-name".' };
+      return { passed: Boolean(label && input && cleanText(label.textContent) === text), message: `Hubungkan label for="${check.labelFor}" dengan input id="${check.inputId}".` };
     }
     if (check.kind === 'inputAttributes') {
       const input = documentFragment.querySelector('input');
@@ -246,6 +300,17 @@
       const media = firstElement(documentFragment, check.tag);
       return { passed: Boolean(media && media.getAttribute(check.attr) === check.value && media.hasAttribute(check.requiredAttr)), message: `Gunakan ${check.tag} dengan src="${check.value}" dan atribut ${check.requiredAttr}.` };
     }
+    if (check.kind === 'comment') {
+      const comments = [];
+      const walker = documentFragment.createTreeWalker(documentFragment, NodeFilter.SHOW_COMMENT);
+      let node;
+      while ((node = walker.nextNode())) comments.push(cleanText(node.nodeValue));
+      return { passed: comments.includes(cleanText(check.text)), message: `Tambahkan komentar HTML: <!-- ${check.text} -->.` };
+    }
+    if (check.kind === 'metaContent') {
+      const meta = documentFragment.querySelector(`meta[name="${check.name}"]`);
+      return { passed: Boolean(meta && cleanText(meta.getAttribute('content')) === cleanText(check.content)), message: `Tambahkan meta name="${check.name}" dengan content yang sesuai.` };
+    }
     return { passed: false, message: 'Cek kembali struktur kode HTML.' };
   }
 
@@ -262,8 +327,8 @@
     const lessonVisual = visualChallenge ? `<div class="visual-target"><div class="visual-target-head"><span class="window-dots"><i></i><i></i><i></i></span><span>${visualChallenge.label}</span><span class="code-lang">BROWSER</span></div><div class="target-browser">${visualChallenge.html}</div><div class="visual-clue"><span>✦</span><div><strong>CLUE</strong><p>${visualChallenge.clue}</p></div></div></div>` : `<div class="lesson-code large"><div class="code-window-head"><span class="window-dots"><i></i><i></i><i></i></span><span>concept.html</span><span class="code-lang">READ ONLY</span></div><pre><code>${escapeHtml(question.lessonCode)}</code></pre></div><div class="insight"><span>✦</span><span><strong>Quick insight</strong>${question.hint}</span></div>`;
     const visualPrompt = visualChallenge ? 'Bangun potongan HTML yang menghasilkan tampilan preview target di sebelah kiri.' : question.prompt;
     $('#exam-view').innerHTML = `
-      <section class="exam-topline"><div><p class="eyebrow">HTML CHALLENGE / LIVE SESSION</p><h2>Complete the layer<span class="hero-dot">.</span></h2></div><div class="exam-clock"><span class="clock-icon">◷</span><div><span>ELAPSED TIME</span><strong id="elapsed-time">${formatDuration((Date.now() - state.startedAt) / 1000)}</strong></div></div></section>
-      <div class="exam-progress-row"><span>CHALLENGE <strong>${String(state.currentIndex + 1).padStart(2, '0')}</strong> / ${String(state.questionOrder.length).padStart(2, '0')}</span><span>${progress}% complete</span></div><div class="exam-progress"><span style="width:${progress}%"></span></div>
+      <section class="exam-topline"><div><p class="eyebrow">HTML CHALLENGE / LIVE SESSION</p><h2>Complete the layer<span class="hero-dot">.</span></h2></div><div class="exam-clock"><span class="clock-icon">◷</span><div><span>ACTIVE ELAPSED TIME</span><strong id="elapsed-time">${formatDuration(getElapsedSeconds())}</strong></div></div></section>
+      <div class="exam-progress-row"><span>CHALLENGE <strong>${String(state.currentIndex + 1).padStart(2, '0')}</strong> / ${String(state.questionOrder.length).padStart(2, '0')}</span><span>${progress}% complete · active time only</span></div><div class="exam-progress"><span style="width:${progress}%"></span></div>
       <section class="exam-grid"><div class="lesson-panel"><div class="panel-label"><span class="label-dot"></span> ${visualChallenge ? 'SEE & BUILD' : 'BEFORE YOU CODE'} <span class="panel-module">${COURSE.modules.find((module) => module.id === question.module)?.title || 'HTML'}</span></div><h3>${question.lessonTitle}</h3><p>${visualChallenge ? 'Amati output browser, baca clue, lalu tulis struktur HTML yang dapat menghasilkan tampilan tersebut.' : question.lessonBody}</p>${lessonVisual}</div><div class="question-panel"><div class="question-number">Q${String(state.currentIndex + 1).padStart(2, '0')} <span>of ${String(state.questionOrder.length).padStart(2, '0')}</span></div><h3>${question.title}</h3><p class="question-prompt">${visualPrompt}</p><div class="editor-shell ${feedback ? (feedback.passed ? 'passed' : 'failed') : ''}"><div class="editor-head"><span><i></i> answer.html</span><div class="editor-tools"><button type="button" data-editor-action="reset">Reset</button><span class="editor-type">TYPE MANUALLY</span></div></div><textarea id="answer-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" aria-label="Kode jawaban">${escapeHtml(state.answers[question.id] || question.starter)}</textarea><div class="editor-foot"><span>Type manually · ⌘ / Ctrl + Enter to check</span><button id="check-answer" class="check-button">Check code <span>↗</span></button></div></div><div class="clipboard-lock"><span>⌁</span> Copy-paste, cut, dan drag-drop kode dinonaktifkan untuk challenge ini.</div><div class="preview-card"><div class="preview-head"><span><span class="label-dot"></span> LIVE PREVIEW</span><span>lihat hasil HTML kamu</span></div><iframe id="live-preview" title="Preview hasil kode HTML" sandbox=""></iframe></div>${feedback ? `<div class="feedback ${feedback.passed ? 'success' : 'error'}"><span>${feedback.passed ? '✓' : '!'}</span><div><strong>${feedback.passed ? 'Looks good!' : 'Keep iterating'}</strong><p>${feedback.message}</p></div></div>` : ''}<div class="question-actions"><button id="prev-question" class="secondary-button" ${state.currentIndex === 0 ? 'disabled' : ''}>← Previous</button><button id="next-question" class="primary-button">${state.currentIndex === state.questionOrder.length - 1 ? 'Finish test' : 'Next prompt'} <span>→</span></button></div></div></section>
     `;
     bindExamEvents(question);
@@ -386,18 +451,10 @@
     const npm = $('#npm').value.trim();
     const name = $('#student-name').value.trim();
     if (npm.length < 3 || name.length < 2) { showToast('Isi NPM dan nama lengkap terlebih dahulu.', 'error'); return; }
-    const isNewStudent = state.user && (state.user.npm !== npm || state.user.name !== name);
-    if (isNewStudent) {
-      state.viewedModules = [];
-      state.questionOrder = [];
-      state.currentIndex = 0;
-      state.answers = {};
-      state.feedback = {};
-      state.startedAt = null;
-      state.finishedAt = null;
-      state.lastResult = null;
-    }
-    state.user = { npm, name };
+    const user = { npm, name };
+    const sameStudent = state.user && profileKey(state.user) === profileKey(user);
+    if (!sameStudent) state = loadProfile(user) || createDefaultState(user);
+    state.user = user;
     state.view = 'dashboard';
     persist();
     renderShell();
@@ -405,8 +462,9 @@
 
   $('#logout-button').addEventListener('click', () => {
     stopTimer();
-    state = { ...defaultState };
-    persist();
+    state = createDefaultState();
+    localStorage.removeItem(ACTIVE_PROFILE_KEY);
+    localStorage.removeItem(STORAGE_KEY);
     renderShell();
   });
 

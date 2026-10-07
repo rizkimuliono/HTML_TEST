@@ -28,7 +28,7 @@ function doPost(event) {
       payload.course || 'HTML // FOUNDATIONS',
       Number(payload.score || 0),
       Number(payload.passedCount || 0),
-      Number(payload.total || 20),
+      Number(payload.total || 30),
       Number(payload.durationSeconds || 0),
       payload.completedAt || ''
     ]);

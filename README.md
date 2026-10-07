@@ -1,6 +1,6 @@
 # HTML LAB — Interactive LMS
 
-LMS mini untuk materi dasar HTML: login mahasiswa, materi per modul, 20 coding challenge yang diacak, editor kode dengan structural validation, live preview, reset, pembatasan copy-paste, timer elapsed (tanpa countdown), penilaian, dan penyimpanan hasil.
+LMS mini untuk materi lengkap HTML: 30 materi dari pengertian HTML sampai halaman lengkap, 30 coding challenge yang diacak, editor kode dengan structural validation, visual challenge, live preview, reset, pembatasan copy-paste, timer elapsed (tanpa countdown), penilaian, dan penyimpanan hasil.
 
 ## Jalankan lokal
 
@@ -22,7 +22,7 @@ Frontend GitHub Pages tidak boleh memuat client secret / refresh token. Gunakan 
 4. Salin URL `/exec` ke `config.js` pada property `apiUrl`.
 5. Push perubahan ke GitHub dan aktifkan GitHub Pages dari branch utama.
 
-Jika `apiUrl` kosong, hasil tetap tersimpan di browser mahasiswa sebagai fallback lokal. Data login dan hasil tidak akan terkirim ke mana pun sampai endpoint diisi.
+Jika `apiUrl` kosong, hasil tetap tersimpan di browser mahasiswa sebagai fallback lokal. Progress belajar dan progress pengerjaan test disimpan per kombinasi NPM + nama pada browser, sehingga mahasiswa yang login kembali di perangkat yang sama dapat melanjutkan progressnya. Data login dan hasil tidak akan terkirim ke mana pun sampai endpoint diisi.
 
 ## Ganti topik di masa depan
 
