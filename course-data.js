@@ -168,7 +168,7 @@ window.COURSE_CHECKS = {
   'html-14': [{ kind: 'inputTypes', values: ['text', 'password', 'email', 'number', 'date', 'radio', 'checkbox', 'file', 'color', 'range', 'submit', 'reset'] }],
   'html-15': [{ kind: 'hasAttributes', attrs: [{ tag: 'input', attr: 'name' }, { tag: 'input', attr: 'value' }, { tag: 'input', attr: 'placeholder' }, { tag: 'input', attr: 'required' }, { tag: 'input', attr: 'maxlength' }, { tag: 'input', attr: 'min' }, { tag: 'input', attr: 'max' }, { tag: 'input', attr: 'readonly' }] }, { kind: 'hasAttribute', tag: 'input', attr: 'checked' }, { kind: 'hasAttribute', tag: 'option', attr: 'selected' }],
   'html-16': [{ kind: 'hasTags', tags: ['audio', 'video', 'source'] }, { kind: 'hasAttribute', tag: 'audio', attr: 'controls' }, { kind: 'hasAttribute', tag: 'video', attr: 'muted' }],
-  'html-17': [{ kind: 'attribute', tag: 'iframe', attr: 'src', value: 'https://www.youtube.com/embed/VIDEO_ID' }, { kind: 'attribute', tag: 'iframe', attr: 'title', value: 'Video pengantar HTML' }],
+  'html-17': [{ kind: 'iframeEmbed', requireTitle: true }],
   'html-18': [{ kind: 'elementText', tag: 'p', text: '<h1>HTML</h1> & aman' }],
   'html-19': [{ kind: 'comment', text: 'Bagian utama' }, { kind: 'elementText', tag: 'p', text: 'Konten halaman' }],
   'html-20': [{ kind: 'attribute', tag: 'div', attr: 'id', value: 'app' }, { kind: 'attribute', tag: 'div', attr: 'class', value: 'card' }, { kind: 'attribute', tag: 'div', attr: 'data-state', value: 'ready' }, { kind: 'attribute', tag: 'div', attr: 'lang', value: 'id' }],
