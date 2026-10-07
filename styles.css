@@ -15,6 +15,24 @@
   --sans: 'Space Grotesk', sans-serif;
 }
 
+/* CodeMirror Dracula editor and clearer challenge instructions */
+.CodeMirror { min-height: 260px; padding: 12px 0; background: #282a36; color: #f8f8f2; font-family: var(--mono); font-size: 14px; line-height: 1.75; }
+.CodeMirror-scroll { min-height: 260px; }
+.CodeMirror-gutters { border-right: 1px solid rgba(189,147,249,.17); background: #282a36; }
+.CodeMirror-linenumber { padding: 0 12px 0 8px; color: #6272a4; }
+.CodeMirror-cursor { border-left-color: #ff79c6; }
+.CodeMirror-selected { background: rgba(189,147,249,.28) !important; }
+.cm-s-dracula .cm-tag { color: #ff79c6; }.cm-s-dracula .cm-attribute { color: #50fa7b; }.cm-s-dracula .cm-string { color: #f1fa8c; }.cm-s-dracula .cm-comment { color: #6272a4; }.cm-s-dracula .cm-bracket { color: #8be9fd; }
+.module-lesson-copy { margin: 13px 0; padding: 22px; border: 1px solid rgba(8,127,152,.16); border-radius: 14px; background: rgba(8,127,152,.045); }
+.module-lesson-copy > p:not(.eyebrow) { margin: 11px 0 17px; color: #53617f; font-size: 15px; line-height: 1.75; }
+.detailed-example { border-radius: 10px; }
+.challenge-brief { margin-bottom: 18px; padding: 14px 15px; border: 1px solid rgba(104,72,204,.16); border-radius: 11px; background: rgba(104,72,204,.045); }
+.challenge-brief .question-prompt { margin: 0; color: #354163; font-size: 16px; font-weight: 600; line-height: 1.55; }
+.challenge-instructions { margin-top: 12px; padding-top: 11px; border-top: 1px solid rgba(43,57,112,.1); }
+.challenge-instructions strong { color: var(--violet); font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; }
+.challenge-instructions ol { display: grid; gap: 5px; margin: 8px 0 0; padding-left: 21px; color: #687493; font-size: 12px; line-height: 1.45; }
+.challenge-instructions li::marker { color: var(--cyan); font-family: var(--mono); }
+
 * {
   box-sizing: border-box;
 }

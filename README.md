@@ -1,6 +1,6 @@
 # HTML LAB — Interactive LMS
 
-LMS mini untuk materi lengkap HTML: 30 materi dari pengertian HTML sampai halaman lengkap, 30 coding challenge yang diacak, editor kode dengan structural validation, visual challenge, live preview, reset, pembatasan copy-paste, timer elapsed (tanpa countdown), penilaian, dan penyimpanan hasil.
+LMS mini untuk materi lengkap HTML: 30 materi dari pengertian HTML sampai halaman lengkap, 30 coding challenge yang diacak, materi detail dengan contoh, editor CodeMirror tema Dracula dengan structural validation, visual challenge, live preview, reset, pembatasan copy-paste, timer active elapsed (tanpa countdown), penilaian, dan penyimpanan hasil.
 
 ## Jalankan lokal
 

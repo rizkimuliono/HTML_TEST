@@ -70,6 +70,78 @@ const questions = [
   { id: 'html-30', module: 'm30', title: 'Ship a complete page', prompt: 'Gabungkan header, nav, main berisi section profil, dan footer menjadi satu halaman HTML.', lessonTitle: 'Halaman lengkap', lessonBody: 'Challenge terakhir menggabungkan struktur, semantic HTML, navigasi, konten, dan penutup halaman menjadi satu fondasi website yang siap dikembangkan.', lessonCode: '<header><h1>HTML Lab</h1></header>\n<nav><a href="/">Beranda</a></nav>\n<main><section><h2>Profil</h2></section></main>\n<footer>© 2026 HTML Lab</footer>', starter: '<!-- Bangun satu halaman lengkap -->', required: ['<header'] }
 ];
 
+const detailedNotes = {
+  m01: { explanation: 'HTML adalah bahasa markup yang memberi struktur, hierarki, dan arti pada konten web. Browser tidak menjalankan HTML seperti program; browser membaca elemen lalu membangun DOM yang dapat ditampilkan, dicari, dan dibaca teknologi bantu.', example: '<h1>Profil Mahasiswa</h1>\n<p>HTML menyusun struktur halaman.</p>' },
+  m02: { explanation: 'Dokumen HTML5 dimulai dengan doctype, lalu satu root html. Metadata diletakkan di head, sedangkan konten visual berada di body. Setiap elemen berpasangan harus ditutup dengan urutan yang benar.', example: '<!doctype html>\n<html lang="id">\n  <head><title>HTML Lab</title></head>\n  <body>Konten</body>\n</html>' },
+  m03: { explanation: 'Tag adalah penanda seperti p. Element adalah tag beserta isi dan penutupnya. Attribute berada di opening tag dan memberi konfigurasi atau identitas. Void element seperti img dan input tidak memiliki closing tag.', example: '<p class="intro">Halo</p>\n<img src="logo.png" alt="Logo">\n<input type="email">' },
+  m04: { explanation: 'Heading menyatakan struktur topik, bukan sekadar ukuran huruf. Mulai dengan satu h1 sebagai judul halaman, gunakan h2 untuk bagian utama, lalu h3 dan seterusnya untuk subbagian.', example: '<h1>Belajar HTML</h1>\n<h2>Struktur Dokumen</h2>\n<h3>Elemen body</h3>' },
+  m05: { explanation: 'Paragraf adalah unit informasi yang berdiri sendiri. br hanya untuk perpindahan baris yang memang bermakna, sedangkan hr menandai jeda atau perubahan topik. Spasi layout sebaiknya dikerjakan oleh CSS.', example: '<p>Baris pertama</p>\n<br>\n<hr>\n<p>Topik berikutnya</p>' },
+  m06: { explanation: 'Gunakan strong untuk kepentingan kuat dan em untuk penekanan. b dan i hanya menyatakan tampilan visual. mark menyorot, del menandai hapus, ins menandai tambahan, small untuk catatan, sedangkan sub dan sup untuk indeks.', example: '<p><strong>Penting</strong> dan <em>perhatikan</em> bagian ini.</p>\n<p>H<sub>2</sub>O · x<sup>2</sup></p>' },
+  m07: { explanation: 'Anchor menghubungkan pengguna ke tujuan. href dapat berisi path internal, URL eksternal, fragment #id, mailto, atau tel. Saat memakai target blank, pertimbangkan keamanan dan pengalaman pengguna.', example: '<a href="pages/about.html">Tentang</a>\n<a href="https://developer.mozilla.org" target="_blank">MDN</a>\n<a href="mailto:lab@example.com">Email</a>' },
+  m08: { explanation: 'Gambar membutuhkan src yang benar dan alt yang menjelaskan makna gambar. Jangan mengulang kata “gambar” di alt jika tidak perlu. Relative path mengikuti posisi file HTML, sedangkan absolute path menunjuk alamat lengkap.', example: '<img src="images/logo.png" alt="Logo HTML Lab" width="240" height="120">' },
+  m09: { explanation: 'Gunakan ul ketika urutan tidak penting dan ol ketika urutan memiliki makna. li adalah satu item. List dapat bersarang dengan menempatkan ul atau ol di dalam li. Gunakan dl untuk istilah dan deskripsi pasangannya.', example: '<ol>\n  <li>Riset</li>\n  <li>Kode</li>\n</ol>\n<dl><dt>HTML</dt><dd>Struktur web</dd></dl>' },
+  m10: { explanation: 'div dan span tidak membawa arti khusus, tetapi berguna sebagai container. div mengikuti perilaku block, span mengikuti inline. Tambahkan class atau id agar container dapat ditargetkan CSS dan JavaScript.', example: '<div class="card">\n  <span class="label">HTML Lab</span>\n</div>' },
+  m11: { explanation: 'Semantic HTML menggunakan nama elemen berdasarkan perannya. Landmark seperti header, nav, main, section, article, aside, dan footer membuat struktur lebih mudah dipahami tanpa bergantung pada class buatan.', example: '<header>Logo</header>\n<nav>Menu</nav>\n<main><section><article>Konten</article></section></main>\n<footer>Copyright</footer>' },
+  m12: { explanation: 'Tabel hanya untuk data yang memiliki relasi baris dan kolom. th menjelaskan kolom atau baris, td berisi data. Kelompok thead, tbody, dan tfoot membantu struktur; colspan dan rowspan menggabungkan sel.', example: '<table>\n  <thead><tr><th>Nama</th><th>Skor</th></tr></thead>\n  <tbody><tr><td>Ana</td><td>90</td></tr></tbody>\n</table>' },
+  m13: { explanation: 'Form mengumpulkan input pengguna. Label harus terhubung lewat for dan id. Fieldset mengelompokkan kontrol yang berhubungan, legend memberi judul kelompok, dan button menentukan aksi yang dapat dilakukan.', example: '<form>\n  <label for="name">Nama</label>\n  <input id="name" name="name">\n  <button type="submit">Kirim</button>\n</form>' },
+  m14: { explanation: 'Jenis input menentukan kontrol dan validasi bawaan browser. Pilih type sesuai data: email untuk email, date untuk tanggal, number untuk angka, radio untuk satu pilihan, dan checkbox untuk pilihan jamak.', example: '<input type="email" name="email">\n<input type="date" name="birth-date">\n<input type="checkbox" name="agree">' },
+  m15: { explanation: 'Attribute form mengontrol data dan interaksi. name menjadi kunci saat dikirim, value menjadi nilai awal, placeholder memberi contoh, required memaksa pengisian, dan readonly atau disabled mengubah status interaksi.', example: '<input name="score" value="90" placeholder="Skor" min="0" max="100" required>' },
+  m16: { explanation: 'audio dan video menampilkan media native. controls memberi kontrol pengguna, source menyediakan format alternatif, loop mengulang, muted membisukan, dan autoplay sebaiknya dipakai sangat hati-hati.', example: '<video controls muted loop>\n  <source src="intro.mp4" type="video/mp4">\n</video>' },
+  m17: { explanation: 'iframe membuat browsing context di dalam halaman. Gunakan URL embed resmi, title yang menjelaskan isi, dan atribut keamanan seperti sandbox atau allow sesuai kebutuhan. Tidak semua situs mengizinkan dirinya ditanamkan.', example: '<iframe src="https://www.youtube.com/embed/VIDEO_ID" title="Video HTML" sandbox></iframe>' },
+  m18: { explanation: 'Parser HTML memperlakukan <, >, dan & sebagai bagian syntax. Gunakan entity ketika simbol tersebut ingin ditampilkan sebagai teks, terutama saat mendokumentasikan contoh kode HTML.', example: '<p>&lt;h1&gt;HTML&lt;/h1&gt; &amp; aman</p>\n<p>&copy; 2026</p>' },
+  m19: { explanation: 'Komentar adalah catatan developer yang tidak dirender. Komentar bermanfaat untuk menjelaskan alasan atau pembagian kode, tetapi seluruh isi komentar tetap dapat dilihat dari source sehingga bukan tempat menyimpan rahasia.', example: '<!-- Bagian utama halaman -->\n<main>Konten</main>' },
+  m20: { explanation: 'Attribute global dapat digunakan di banyak elemen. id harus unik, class boleh berulang, title memberi tooltip atau konteks, hidden menyembunyikan elemen, lang menyatakan bahasa, dan data-* menyimpan metadata custom.', example: '<div id="app" class="card" lang="id" data-state="ready" title="Kartu profil">Profil</div>' },
+  m21: { explanation: 'Gunakan id untuk satu target unik, misalnya anchor atau field form. Gunakan class untuk pola yang berulang. Beberapa class pada satu elemen dipisahkan spasi dan dapat dipakai sebagai kombinasi selector.', example: '<section id="profile" class="card highlight">Profil</section>' },
+  m22: { explanation: 'Block element memulai baris baru dan biasanya mengambil ruang horizontal yang tersedia. Inline element mengikuti aliran teks. Perbedaan ini adalah perilaku default dan dapat diubah melalui CSS display.', example: '<div>Block element</div>\n<span>Inline element</span>' },
+  m23: { explanation: 'Nesting menempatkan child di dalam parent. Tutup tag dengan prinsip last opened, first closed. Nesting yang benar menjaga DOM tetap logis dan mencegah browser melakukan perbaikan markup yang tidak diinginkan.', example: '<p><strong>HTML</strong> rapi.</p>' },
+  m24: { explanation: 'Relative path dihitung dari file aktif: images/logo.png berada di folder anak, ../images/logo.png naik satu tingkat, dan / bergantung pada root hosting. Absolute URL berisi protocol dan domain lengkap.', example: '<img src="../images/logo.png" alt="Logo">\n<a href="pages/about.html">Tentang</a>' },
+  m25: { explanation: 'Pemisahan folder membuat project mudah dinavigasi. index.html menjadi pintu masuk, lalu images, css, js, dan pages menyimpan jenis asset atau halaman yang sesuai.', example: '<link rel="stylesheet" href="css/style.css">\n<script src="js/app.js"></script>\n<a href="pages/about.html">Tentang</a>' },
+  m26: { explanation: 'Validasi HTML memeriksa doctype, penutupan tag, nesting, duplicate id, serta attribute yang sesuai. Valid markup membantu browser menghasilkan DOM yang konsisten dan mengurangi bug aksesibilitas.', example: '<!doctype html>\n<html lang="id"><body><p>Tag tertutup</p></body></html>' },
+  m27: { explanation: 'Accessibility dimulai dari struktur yang bermakna. Alt menjelaskan gambar, label menjelaskan input, heading membentuk outline, semantic HTML memberi landmark, dan kontrol harus dapat dicapai melalui keyboard.', example: '<label for="photo">Foto profil</label>\n<input id="photo" type="file">\n<img src="profile.png" alt="Potret mahasiswa">' },
+  m28: { explanation: 'SEO dasar berasal dari informasi yang jelas. title menjadi judul tab dan kandidat judul hasil pencarian, meta description memberi ringkasan, lalu heading dan semantic HTML membantu mesin memahami topik.', example: '<title>HTML Lab</title>\n<meta name="description" content="Belajar HTML dari dasar.">' },
+  m29: { explanation: 'Best practice menjaga kode konsisten: indentasi rapi, nama file deskriptif, tag dan attribute huruf kecil, concern dipisah, serta tag deprecated dihindari. Kode yang mudah dibaca lebih mudah diuji dan dikembangkan.', example: '<link rel="stylesheet" href="css/style.css">\n<main>\n  <h1>HTML Lab</h1>\n</main>' },
+  m30: { explanation: 'Halaman lengkap menggabungkan metadata, header, navigasi, main, section, konten, form atau tabel, dan footer. Mulai dari struktur semantic lalu tambahkan konten satu bagian demi satu bagian.', example: '<header>HTML Lab</header>\n<nav>Beranda</nav>\n<main><section><h2>Profil</h2></section></main>\n<footer>© 2026 HTML Lab</footer>' }
+};
+
+const challengeGuides = {
+  'html-01': ['Buat satu elemen p.', 'Isi persis dengan kalimat “HTML menyusun struktur halaman.”', 'Pastikan p memiliki closing tag.'],
+  'html-02': ['Mulai dengan <!doctype html>.', 'Buat html dengan lang="id".', 'Letakkan body di dalam dokumen.'],
+  'html-03': ['Gunakan tag p.', 'Tambahkan class="intro".', 'Isi paragraf dengan “Halo, web!”.'],
+  'html-04': ['Gunakan heading level 1.', 'Isi h1 dengan “Belajar Web”.'],
+  'html-05': ['Buat p berisi “Baris pertama”.', 'Tambahkan br setelah paragraf.', 'Tambahkan hr sebagai pemisah topik.'],
+  'html-06': ['Gunakan strong untuk “Penting”.', 'Gunakan em untuk “catatan”.'],
+  'html-07': ['Buat link internal ke pages/about.html.', 'Buat link eksternal ke MDN.', 'Tambahkan target="_blank" pada link eksternal.'],
+  'html-08': ['Gunakan img.', 'Isi src, alt, width="240", dan height="120" sesuai permintaan.', 'Ingat img tidak membutuhkan closing tag.'],
+  'html-09': ['Gunakan ul.', 'Buat tiga li dengan urutan HTML, CSS, JavaScript.'],
+  'html-10': ['Buat div sebagai container block.', 'Tempatkan span berisi “HTML Lab” di dalam div.'],
+  'html-11': ['Buat seluruh landmark: header, nav, main, section, article, aside, footer.', 'Pastikan semua tag berada dalam struktur yang valid.'],
+  'html-12': ['Buat table dengan thead, tbody, dan tfoot.', 'Header harus Nama dan Skor.', 'Gunakan colspan="2" pada ringkasan footer.'],
+  'html-13': ['Buat form.', 'Tambahkan label, input, textarea, select-option, button, fieldset, dan legend.'],
+  'html-14': ['Buat satu input untuk setiap type yang diminta.', 'Pastikan type tidak ditulis sebagai teks biasa.', 'Gunakan submit dan reset untuk aksi form.'],
+  'html-15': ['Lengkapi attribute name, value, placeholder, required, maxlength, min, max, readonly.', 'Tambahkan checkbox checked dan option selected.'],
+  'html-16': ['Buat audio dan video.', 'Tambahkan source di dalam masing-masing media.', 'Gunakan controls, loop, dan muted pada video.'],
+  'html-17': ['Gunakan iframe.', 'Pakai URL YouTube embed.', 'Isi title agar frame aksesibel dan pertimbangkan sandbox.'],
+  'html-18': ['Tampilkan contoh tag sebagai teks, bukan sebagai elemen HTML.', 'Gunakan entity untuk <, >, dan &.'],
+  'html-19': ['Buat komentar HTML “Bagian utama”.', 'Tambahkan p berisi “Konten halaman” di bawahnya.'],
+  'html-20': ['Buat satu div.', 'Tambahkan id, class, title, data-state, dan lang sesuai permintaan.'],
+  'html-21': ['Buat section.', 'Tambahkan id="profile".', 'Tambahkan dua class: card dan highlight.'],
+  'html-22': ['Buat div berisi “Block”.', 'Buat span berisi “Inline”.', 'Perhatikan perbedaan default block dan inline.'],
+  'html-23': ['Buat p sebagai parent.', 'Tempatkan strong berisi “HTML” di dalam p.', 'Tutup strong sebelum menutup p.'],
+  'html-24': ['Gunakan img.', 'Arahkan src ke ../images/logo.png.', 'Tambahkan alt="Logo”.'],
+  'html-25': ['Hubungkan css/style.css dengan link stylesheet.', 'Buat anchor ke pages/about.html.'],
+  'html-26': ['Mulai dengan doctype.', 'Buat html lang="id" dan title “Valid”.', 'Pastikan p “Rapi” tertutup.'],
+  'html-27': ['Hubungkan label for="photo" dengan input id="photo".', 'Gunakan input type file.', 'Tambahkan alt bermakna pada img.'],
+  'html-28': ['Buat title “HTML Lab”.', 'Buat meta name="description".', 'Isi content dengan “Belajar HTML dari dasar.”.'],
+  'html-29': ['Gunakan tag dan attribute huruf kecil.', 'Hubungkan stylesheet eksternal.', 'Buat main dengan h1 yang terindentasi rapi.'],
+  'html-30': ['Buat header dan nav.', 'Buat main berisi section dan h2 “Profil”.', 'Tutup halaman dengan footer.']
+};
+
+moduleCatalog.forEach((module) => Object.assign(module, detailedNotes[module.id]));
+questions.forEach((question) => {
+  question.steps = challengeGuides[question.id];
+  question.hint = question.hint || question.steps?.[0] || 'Ikuti instruksi, tulis HTML secara manual, lalu periksa hasilnya.';
+});
+
 window.COURSE = {
   slug: 'html-foundations-complete',
   title: 'HTML // FOUNDATIONS COMPLETE',

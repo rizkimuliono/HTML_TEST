@@ -30,6 +30,7 @@
   }
 
   let activeTimerStartedAt = null;
+  let codeEditorInstance = null;
   let state = loadState();
   let timerHandle = null;
 
@@ -209,7 +210,7 @@
     $('#lesson-view').innerHTML = `
       <section class="page-intro"><div><p class="eyebrow">LEARNING PATH / ${activeModule.number}</p><h2>${activeModule.title}<span class="hero-dot">.</span></h2><p>${activeModule.description} Pelajari konsepnya, lalu uji dengan prompt di akhir perjalanan.</p></div><div class="lesson-progress"><span>MODULE ${activeModule.number} / ${String(COURSE.modules.length).padStart(2, '0')}</span><strong>${Math.round((state.viewedModules.length / COURSE.modules.length) * 100)}%</strong><div class="progress-line"><span style="width:${Math.round((state.viewedModules.length / COURSE.modules.length) * 100)}%"></span></div></div></section>
       <div class="module-tabs">${COURSE.modules.map((module) => `<button class="module-tab ${module.id === activeModule.id ? 'active' : ''}" data-module-tab="${module.id}"><span>${module.number}</span>${module.title}</button>`).join('')}</div>
-      <section class="lesson-layout"><div class="lesson-main"><div class="lesson-banner"><span class="big-module-icon">${activeModule.icon}</span><div><p class="eyebrow">CONCEPT DROP</p><h3>${activeModule.title}</h3><p>${activeModule.description}</p></div></div><div class="concept-card module-detail-card"><div class="concept-body"><span class="concept-tag">Yang akan kamu kuasai</span><ul class="concept-points">${activeModule.details.map((detail) => `<li>${escapeHtml(detail)}</li>`).join('')}</ul></div></div><div class="concept-list">${moduleQuestions.map((question, index) => `<article class="concept-card"><div class="concept-index">${String(index + 1).padStart(2, '0')}</div><div class="concept-body"><span class="concept-tag">${question.lessonTitle}</span><p>${question.lessonBody}</p><div class="lesson-code"><div class="code-window-head"><span class="window-dots"><i></i><i></i><i></i></span><span>snippet.html</span><span class="code-lang">DRACULA</span></div><pre><code>${highlightCode(question.lessonCode)}</code></pre></div></div></article>`).join('')}</div></div><aside class="lesson-aside"><div class="aside-sticky"><p class="eyebrow">CHECKPOINT</p><h3>Ready to<br /><em>test your flow?</em></h3><p>${moduleQuestions.length} challenge dari modul ini menunggumu di dalam ujian utama.</p><div class="checkpoint-count"><strong>${moduleQuestions.length}</strong><span>coding prompts</span></div><button class="primary-button full-button" data-action="start-exam">Go to challenge <span>↗</span></button></div></aside></section>
+      <section class="lesson-layout"><div class="lesson-main"><div class="lesson-banner"><span class="big-module-icon">${activeModule.icon}</span><div><p class="eyebrow">CONCEPT DROP</p><h3>${activeModule.title}</h3><p>${activeModule.description}</p></div></div><div class="module-lesson-copy"><p class="eyebrow">PENJELASAN MATERI</p><p>${escapeHtml(activeModule.explanation)}</p><div class="lesson-code detailed-example"><div class="code-window-head"><span class="window-dots"><i></i><i></i><i></i></span><span>example.html</span><span class="code-lang">DRACULA</span></div><pre><code>${highlightCode(activeModule.example)}</code></pre></div></div><div class="concept-card module-detail-card"><div class="concept-body"><span class="concept-tag">Yang akan kamu kuasai</span><ul class="concept-points">${activeModule.details.map((detail) => `<li>${escapeHtml(detail)}</li>`).join('')}</ul></div></div><div class="concept-list">${moduleQuestions.map((question, index) => `<article class="concept-card"><div class="concept-index">${String(index + 1).padStart(2, '0')}</div><div class="concept-body"><span class="concept-tag">${question.lessonTitle}</span><p>${question.lessonBody}</p><div class="lesson-code"><div class="code-window-head"><span class="window-dots"><i></i><i></i><i></i></span><span>snippet.html</span><span class="code-lang">DRACULA</span></div><pre><code>${highlightCode(question.lessonCode)}</code></pre></div></div></article>`).join('')}</div></div><aside class="lesson-aside"><div class="aside-sticky"><p class="eyebrow">CHECKPOINT</p><h3>Ready to<br /><em>test your flow?</em></h3><p>${moduleQuestions.length} challenge dari modul ini menunggumu di dalam ujian utama.</p><div class="checkpoint-count"><strong>${moduleQuestions.length}</strong><span>coding prompts</span></div><button class="primary-button full-button" data-action="start-exam">Go to challenge <span>↗</span></button></div></aside></section>
     `;
     $$('[data-module-tab]').forEach((tab) => tab.addEventListener('click', () => { state.selectedModule = tab.dataset.moduleTab; renderLesson(); }));
     $('[data-action="start-exam"]').addEventListener('click', () => startExam());
@@ -326,7 +327,7 @@
 
   function renderExam() {
     if (!state.questionOrder.length || state.finishedAt) {
-      $('#exam-view').innerHTML = '<div class="empty-state"><span>✦</span><h2>Your challenge awaits.</h2><p>Mulai ujian untuk mendapatkan 20 prompt HTML yang diacak.</p><button class="primary-button" data-action="begin">Begin challenge ↗</button></div>';
+      $('#exam-view').innerHTML = `<div class="empty-state"><span>✦</span><h2>Your challenge awaits.</h2><p>Mulai ujian untuk mendapatkan ${COURSE.questions.length} prompt HTML yang diacak.</p><button class="primary-button" data-action="begin">Begin challenge ↗</button></div>`;
       $('[data-action="begin"]').addEventListener('click', startExam);
       return;
     }
@@ -334,57 +335,97 @@
     const feedback = state.feedback[question.id];
     const visualChallenge = VISUAL_CHALLENGES[question.id];
     const progress = Math.round(((state.currentIndex + 1) / state.questionOrder.length) * 100);
-    const lessonVisual = visualChallenge ? `<div class="visual-target"><div class="visual-target-head"><span class="window-dots"><i></i><i></i><i></i></span><span>${visualChallenge.label}</span><span class="code-lang">BROWSER</span></div><div class="target-browser">${visualChallenge.html}</div><div class="visual-clue"><span>✦</span><div><strong>CLUE</strong><p>${visualChallenge.clue}</p></div></div></div>` : `<div class="lesson-code large"><div class="code-window-head"><span class="window-dots"><i></i><i></i><i></i></span><span>concept.html</span><span class="code-lang">READ ONLY</span></div><pre><code>${escapeHtml(question.lessonCode)}</code></pre></div><div class="insight"><span>✦</span><span><strong>Quick insight</strong>${question.hint}</span></div>`;
+    const insight = question.hint || (visualChallenge ? visualChallenge.clue : question.lessonBody);
+    const lessonVisual = visualChallenge ? `<div class="visual-target"><div class="visual-target-head"><span class="window-dots"><i></i><i></i><i></i></span><span>${visualChallenge.label}</span><span class="code-lang">BROWSER</span></div><div class="target-browser">${visualChallenge.html}</div><div class="visual-clue"><span>✦</span><div><strong>CLUE</strong><p>${visualChallenge.clue}</p></div></div></div>` : `<div class="lesson-code large"><div class="code-window-head"><span class="window-dots"><i></i><i></i><i></i></span><span>concept.html</span><span class="code-lang">DRACULA</span></div><pre><code>${highlightCode(question.lessonCode)}</code></pre></div><div class="insight"><span>✦</span><span><strong>QUICK INSIGHT</strong>${escapeHtml(insight)}</span></div>`;
     const visualPrompt = visualChallenge ? 'Bangun potongan HTML yang menghasilkan tampilan preview target di sebelah kiri.' : question.prompt;
+    const challengeSteps = question.steps || ['Baca permintaan soal.', 'Tulis HTML secara manual.', 'Klik Check code untuk melihat hasil validasi.'];
     $('#exam-view').innerHTML = `
       <section class="exam-topline"><div><p class="eyebrow">HTML CHALLENGE / LIVE SESSION</p><h2>Complete the layer<span class="hero-dot">.</span></h2></div><div class="exam-clock"><span class="clock-icon">◷</span><div><span>ACTIVE ELAPSED TIME</span><strong id="elapsed-time">${formatDuration(getElapsedSeconds())}</strong></div></div></section>
       <div class="exam-progress-row"><span>CHALLENGE <strong>${String(state.currentIndex + 1).padStart(2, '0')}</strong> / ${String(state.questionOrder.length).padStart(2, '0')}</span><span>${progress}% complete · active time only</span></div><div class="exam-progress"><span style="width:${progress}%"></span></div>
-      <section class="exam-grid"><div class="lesson-panel"><div class="panel-label"><span class="label-dot"></span> ${visualChallenge ? 'SEE & BUILD' : 'BEFORE YOU CODE'} <span class="panel-module">${COURSE.modules.find((module) => module.id === question.module)?.title || 'HTML'}</span></div><h3>${question.lessonTitle}</h3><p>${visualChallenge ? 'Amati output browser, baca clue, lalu tulis struktur HTML yang dapat menghasilkan tampilan tersebut.' : question.lessonBody}</p>${visualChallenge ? lessonVisual : `<div class="lesson-code large"><div class="code-window-head"><span class="window-dots"><i></i><i></i><i></i></span><span>concept.html</span><span class="code-lang">DRACULA</span></div><pre><code>${highlightCode(question.lessonCode)}</code></pre></div><div class="insight"><span>✦</span><span><strong>Quick insight</strong>${question.hint}</span></div>`}</div><div class="question-panel"><div class="question-number">Q${String(state.currentIndex + 1).padStart(2, '0')} <span>of ${String(state.questionOrder.length).padStart(2, '0')}</span></div><h3>${question.title}</h3><p class="question-prompt">${visualPrompt}</p><div class="editor-shell ${feedback ? (feedback.passed ? 'passed' : 'failed') : ''}"><div class="editor-head"><span><i></i> answer.html</span><div class="editor-tools"><button type="button" data-editor-action="reset">Reset</button><span class="editor-type">TYPE MANUALLY</span></div></div><textarea id="answer-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" aria-label="Kode jawaban">${escapeHtml(state.answers[question.id] || question.starter)}</textarea><div class="editor-foot"><span>Type manually · ⌘ / Ctrl + Enter to check</span><button id="check-answer" class="check-button">Check code <span>↗</span></button></div></div><div class="clipboard-lock"><span>⌁</span> Copy-paste, cut, dan drag-drop kode dinonaktifkan untuk challenge ini.</div><div class="preview-card"><div class="preview-head"><span><span class="label-dot"></span> LIVE PREVIEW</span><span>lihat hasil HTML kamu</span></div><iframe id="live-preview" title="Preview hasil kode HTML" sandbox=""></iframe></div>${feedback ? `<div class="feedback ${feedback.passed ? 'success' : 'error'}"><span>${feedback.passed ? '✓' : '!'}</span><div><strong>${feedback.passed ? 'Looks good!' : 'Keep iterating'}</strong><p>${feedback.message}</p></div></div>` : ''}<div class="question-actions"><button id="prev-question" class="secondary-button" ${state.currentIndex === 0 ? 'disabled' : ''}>← Previous</button><button id="next-question" class="primary-button">${state.currentIndex === state.questionOrder.length - 1 ? 'Finish test' : 'Next prompt'} <span>→</span></button></div></div></section>
+      <section class="exam-grid"><div class="lesson-panel"><div class="panel-label"><span class="label-dot"></span> ${visualChallenge ? 'SEE & BUILD' : 'BEFORE YOU CODE'} <span class="panel-module">${COURSE.modules.find((module) => module.id === question.module)?.title || 'HTML'}</span></div><h3>${question.lessonTitle}</h3><p>${visualChallenge ? 'Amati output browser, baca clue, lalu tulis struktur HTML yang dapat menghasilkan tampilan tersebut.' : question.lessonBody}</p>${lessonVisual}</div><div class="question-panel"><div class="question-number">Q${String(state.currentIndex + 1).padStart(2, '0')} <span>of ${String(state.questionOrder.length).padStart(2, '0')}</span></div><h3>${question.title}</h3><div class="challenge-brief"><p class="question-prompt">${visualPrompt}</p><div class="challenge-instructions"><strong>Yang harus kamu lakukan</strong><ol>${challengeSteps.map((step) => `<li>${escapeHtml(step)}</li>`).join('')}</ol></div></div><div class="editor-shell ${feedback ? (feedback.passed ? 'passed' : 'failed') : ''}"><div class="editor-head"><span><i></i> answer.html</span><div class="editor-tools"><button type="button" data-editor-action="reset">Reset</button><span class="editor-type">DRACULA · TYPE MANUALLY</span></div></div><textarea id="answer-editor" spellcheck="false" autocomplete="off" autocapitalize="off" autocorrect="off" aria-label="Kode jawaban">${escapeHtml(state.answers[question.id] || question.starter)}</textarea><div class="editor-foot"><span>Type manually · ⌘ / Ctrl + Enter to check</span><button id="check-answer" class="check-button">Check code <span>↗</span></button></div></div><div class="clipboard-lock"><span>⌁</span> Copy-paste, cut, dan drag-drop kode dinonaktifkan untuk challenge ini.</div><div class="preview-card"><div class="preview-head"><span><span class="label-dot"></span> LIVE PREVIEW</span><span>lihat hasil HTML kamu</span></div><iframe id="live-preview" title="Preview hasil kode HTML" sandbox=""></iframe></div>${feedback ? `<div class="feedback ${feedback.passed ? 'success' : 'error'}"><span>${feedback.passed ? '✓' : '!'}</span><div><strong>${feedback.passed ? 'Looks good!' : 'Keep iterating'}</strong><p>${feedback.message}</p></div></div>` : ''}<div class="question-actions"><button id="prev-question" class="secondary-button" ${state.currentIndex === 0 ? 'disabled' : ''}>← Previous</button><button id="next-question" class="primary-button">${state.currentIndex === state.questionOrder.length - 1 ? 'Finish test' : 'Next prompt'} <span>→</span></button></div></div></section>
     `;
     bindExamEvents(question);
     startTimer();
   }
 
   function bindExamEvents(question) {
-    const editor = $('#answer-editor');
-    const updatePreview = () => { const preview = $('#live-preview'); if (preview) preview.srcdoc = editor.value; };
-    editor.addEventListener('input', () => { state.answers[question.id] = editor.value; persist(); });
-    editor.addEventListener('input', updatePreview);
-    editor.addEventListener('keydown', (event) => {
-      if ((event.ctrlKey || event.metaKey) && ['c', 'v', 'x'].includes(event.key.toLowerCase())) {
-        event.preventDefault();
-        showToast('Copy-paste diblokir. Ketik kode secara manual.', 'error');
-        return;
-      }
-      if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') { event.preventDefault(); checkAnswer(question); }
-      if (event.key === 'Tab') { event.preventDefault(); const start = editor.selectionStart; editor.value = `${editor.value.slice(0, start)}  ${editor.value.slice(editor.selectionEnd)}`; editor.selectionStart = editor.selectionEnd = start + 2; state.answers[question.id] = editor.value; }
-    });
+    const textarea = $('#answer-editor');
+    codeEditorInstance = null;
+    const updatePreview = () => { const preview = $('#live-preview'); if (preview) preview.srcdoc = getEditorValue(); };
+    const updateAnswer = (value) => { state.answers[question.id] = value; persist(); updatePreview(); };
+
+    if (typeof window.CodeMirror === 'function') {
+      codeEditorInstance = window.CodeMirror.fromTextArea(textarea, {
+        mode: 'text/html',
+        theme: 'dracula',
+        lineNumbers: true,
+        lineWrapping: true,
+        tabSize: 2,
+        indentUnit: 2,
+        indentWithTabs: false,
+        viewportMargin: Infinity,
+        extraKeys: {
+          'Ctrl-Enter': () => checkAnswer(question),
+          'Cmd-Enter': () => checkAnswer(question),
+          Tab: (instance) => instance.replaceSelection('  '),
+          'Ctrl-C': () => showToast('Copy-paste diblokir. Ketik kode secara manual.', 'error'),
+          'Cmd-C': () => showToast('Copy-paste diblokir. Ketik kode secara manual.', 'error'),
+          'Ctrl-V': () => showToast('Copy-paste diblokir. Ketik kode secara manual.', 'error'),
+          'Cmd-V': () => showToast('Copy-paste diblokir. Ketik kode secara manual.', 'error'),
+          'Ctrl-X': () => showToast('Copy-paste diblokir. Ketik kode secara manual.', 'error'),
+          'Cmd-X': () => showToast('Copy-paste diblokir. Ketik kode secara manual.', 'error')
+        }
+      });
+      codeEditorInstance.on('change', (instance) => updateAnswer(instance.getValue()));
+    } else {
+      textarea.addEventListener('input', () => updateAnswer(textarea.value));
+      textarea.addEventListener('keydown', (event) => {
+        if ((event.ctrlKey || event.metaKey) && ['c', 'v', 'x'].includes(event.key.toLowerCase())) {
+          event.preventDefault();
+          showToast('Copy-paste diblokir. Ketik kode secara manual.', 'error');
+          return;
+        }
+        if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') { event.preventDefault(); checkAnswer(question); }
+        if (event.key === 'Tab') { event.preventDefault(); const start = textarea.selectionStart; textarea.value = `${textarea.value.slice(0, start)}  ${textarea.value.slice(textarea.selectionEnd)}`; textarea.selectionStart = textarea.selectionEnd = start + 2; updateAnswer(textarea.value); }
+      });
+    }
     $('#check-answer').addEventListener('click', () => checkAnswer(question));
     $$('[data-editor-action]').forEach((button) => button.addEventListener('click', () => {
       const action = button.dataset.editorAction;
-      if (action === 'reset') { editor.value = question.starter; state.answers[question.id] = editor.value; state.feedback[question.id] = null; persist(); updatePreview(); renderExam(); showToast('Editor dikembalikan ke starter code.'); }
+      if (action === 'reset') { setEditorValue(question.starter); state.answers[question.id] = question.starter; state.feedback[question.id] = null; persist(); updatePreview(); renderExam(); showToast('Editor dikembalikan ke starter code.'); }
     }));
     bindClipboardLock();
     updatePreview();
     $('#prev-question').addEventListener('click', () => { if (state.currentIndex > 0) { state.currentIndex -= 1; persist(); renderExam(); } });
     $('#next-question').addEventListener('click', () => {
-      const result = validateQuestion(question, state.answers[question.id] || editor.value);
-      state.answers[question.id] = editor.value;
+      const answer = getEditorValue();
+      const result = validateQuestion(question, answer);
+      state.answers[question.id] = answer;
       state.feedback[question.id] = result;
       persist();
       if (!result.passed) { renderExam(); showToast('Coba cek lagi kode kamu.', 'error'); return; }
       if (state.currentIndex === state.questionOrder.length - 1) finishExam();
       else { state.currentIndex += 1; persist(); renderExam(); }
     });
+    updatePreview();
   }
 
   function checkAnswer(question) {
-    const editor = $('#answer-editor');
-    state.answers[question.id] = editor.value;
-    state.feedback[question.id] = validateQuestion(question, editor.value);
+    const answer = getEditorValue();
+    state.answers[question.id] = answer;
+    state.feedback[question.id] = validateQuestion(question, answer);
     persist();
     renderExam();
     showToast(state.feedback[question.id].passed ? 'Jawaban benar. Keep going!' : 'Belum pas, coba lagi.', state.feedback[question.id].passed ? 'success' : 'error');
+  }
+
+  function getEditorValue() {
+    return codeEditorInstance ? codeEditorInstance.getValue() : ($('#answer-editor')?.value || '');
+  }
+
+  function setEditorValue(value) {
+    if (codeEditorInstance) codeEditorInstance.setValue(value);
+    else if ($('#answer-editor')) $('#answer-editor').value = value;
   }
 
   function bindClipboardLock() {
